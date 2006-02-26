@@ -1,0 +1,56 @@
+# vim: set ft=make:
+# Copyright (c) 2005, Gennady Bystritsky <bystr@mac.com>
+# 
+# Distributed under the MIT Licence.
+# This is free software. See 'LICENSE' for details.
+# You must read and accept the license prior to use.
+
+define action.static-library
+  @echo $(0) $@
+  touch $@
+endef
+
+define action.link
+  @echo $(0) $@
+  touch $@
+endef
+
+define action.reloc
+  @echo $(0) $@
+  touch $@
+endef
+
+define action.compile.c
+  @echo $(0) $@
+  touch $@
+endef
+
+define action.compile.cc
+  @echo $(0) $@
+  touch $@
+endef
+
+define action.depend.c
+  @echo $(0) $@
+  touch $@
+endef
+
+define action.depend.cc
+  @echo $(0) $@
+  touch $@
+endef
+
+define action.mkdir
+  @echo $(0) $(1)
+  mkdir $(1); touch $@
+endef
+
+define action.rmdir
+  @echo $(0) $(1)
+  rm -rf $(1)
+endef
+
+define action.rm
+  @echo $(0) $(1)
+  rm  -f $(1)
+endef

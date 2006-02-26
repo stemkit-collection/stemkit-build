@@ -1,0 +1,66 @@
+# vim: set ft=make:
+# Copyright (c) 2005, Gennady Bystritsky <bystr@mac.com>
+# 
+# Distributed under the MIT Licence.
+# This is free software. See 'LICENSE' for details.
+# You must read and accept the license prior to use.
+
+define core.trace
+  ${if ${findstring $(1),$(TRACE)},${warning <$(2)>}}
+endef
+
+# A double dollar sign makes core.trace evaluate at the same time as 
+# include. This fixes the problem in the case an included makefile is
+# empty. It prevents printing the message way before actual loadiing
+# take place.
+#
+define core.load-with
+  $${call core.trace,core,Loading $(1)}
+  $(2) $(1)
+endef
+
+define core.load
+  ${call core.load-with,$(1),include}
+endef
+
+define core.load-if-present
+  ${call core.load-with,$(1),-include}
+endef
+
+define core.load-config
+  ${call core.load,$(core.CONFIG)/$(1)}
+endef
+
+define core.load-project-config
+  ${call core.load-if-present,$(core.TOP)/src/$(core.PROJECT_OFFSET)config/$(1)}
+endef
+
+define core.ensure-set
+  ${foreach v,$(2),${if $($(1).$(v)),,${error $(1).$(v) not defined}}}
+endef
+
+define core.trace-variables
+  ${foreach v,$(2),${call core.trace,$(1),$(1).$(v)=$($(1).$(v))}}
+endef
+
+define core.load-all
+  ${call core.load-config,GMake.util}
+  ${call core.load-config,GMake.system}
+
+  ${call core.load-config,GMake.env}
+  ${call core.load-project-config,GMake.project.env}
+
+  ${call core.load-config,GMake.rules}
+  ${call core.load-project-config,GMake.project.rules}
+
+  ${call core.load-config,GMake.action}
+endef
+
+${call core.ensure-set,core,CWD TOP CWD_FROM_TOP COMMAND CONFIG PLATFORM}
+${call core.trace-variables,core,CWD TOP CWD_FROM_TOP CWD_DOT COMMAND CONFIG PROJECT_OFFSET PLATFORM}
+
+${eval ${call core.load-all}}
+
+${eval ${call system.setup-environment-before}}
+${eval ${call system.load-top-makefile}}
+${eval ${call system.setup-environment-after}}

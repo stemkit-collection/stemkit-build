@@ -1,0 +1,5 @@
+# vim: set ft=make:
+
+objects = a1.c a2.c
+
+${call make-program, p1, $(objects)}

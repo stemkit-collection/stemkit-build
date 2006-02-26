@@ -1,0 +1,148 @@
+#!/usr/bin/env ruby
+# Copyright (c) 2005, Gennady Bystritsky <bystr@mac.com>
+# 
+# Distributed under the MIT Licence.
+# This is free software. See 'LICENSE' for details.
+# You must read and accept the license prior to use.
+
+[ 'sk/application.rb' ].each do |a|
+  $: << ENV.to_hash['PATH'].split(':').find { |p| Dir[ p + '/' + a ].first }
+  require a
+end
+
+# This is a front-end for GNU make 3.80. Earlier versions will not work as the
+# framework makes heavy use of 'eval' function and recursive variable
+# expansion, that became available only since the specified version. It
+# prepares the environment, locates 'src' directory up the current directory
+# and calls the original gmake (looked up via PATH) specifying file
+# ../config/GMake.core (using -f option) relative to the script's location.
+# Within that file a top level GMakefile in directory 'src' will be loaded.
+# To get more diagnostinc on what's going, enviroment variable TRACE may 
+# be used, for instance:
+#   $ TRACE="gmake core system" gmake
+#
+# Normally, both this script and the original gmake must be available via
+# PATH, with this script location earlier in the path. It will then filter
+# itself out when looking for the original gmake.
+#
+class Application < SK::Application
+  def start
+    handle_errors {
+      self.verbose = ENV['TRACE'].to_s.split.include?(script_name)
+
+      commands = find_in_path(script_name)
+      commands.shift while commands.first == $0
+
+      raise "No #{script_name.inspect} in PATH" if commands.empty?
+      invoke commands.first
+    }
+  end
+
+  private
+  #######
+
+  def expanded_script_location
+    @expanded_script_location ||= begin
+      location = File.expand_path(script_location).split(File::SEPARATOR)
+      figure_relative(location, cwd)
+    end
+  end
+
+  def figure_relative(target, origin)
+    target.each_with_index do |_component, _index|
+      next if _component == origin.at(_index)
+      break if _index < 3
+
+      return ([ '..' ] * (origin.size - _index)) + target.slice(_index .. -1)
+    end
+    target
+  end
+
+  def config_location
+    @config_location ||= begin
+      expanded_script_location.slice(0...-1) + [ 'config' ]
+    end
+  end
+
+  def find_in_path(command)
+    ENV['PATH'].split(File::PATH_SEPARATOR).map { |_location|
+      Dir[ File.join(_location, command) ].first
+    }.compact
+  end
+
+  def core_config_file
+    @core_config_file ||= File.join(config_location, 'GMake.core')
+  end
+
+  def cwd
+    @cwd ||= Dir.getwd.split(File::SEPARATOR)
+  end
+
+  def cwd_from_top
+    @cwd_from_top ||= begin
+      index = cwd.rindex('src')
+      raise 'No src in current path' unless index
+
+      cwd.slice(index .. -1)
+    end
+  end
+  
+  def project_offset
+    figure_project_config.first
+  end
+
+  def project_config_file
+    figure_project_config.last
+  end
+
+  def figure_project_config
+    @project_config ||= begin
+      config_dir = 'config'
+      config_file = 'gmake-config.rb'
+
+      top_config_file = File.join(top + [ 'src', config_dir, config_file ])
+      return [ '', top_config_file ] if File.file? top_config_file
+
+      path, *extra = Dir[ File.join(top + [ 'src', '*', config_dir, config_file ]) ]
+      raise "Multiple project #{config_file.inspect} found" unless extra.empty?
+
+      return [ '', nil ] unless path
+      [ path.split(File::SEPARATOR).slice(top.size + 1), path ]
+    end
+  end
+
+  def top
+    Array.new(cwd_from_top.size, '..')
+  end
+
+  def invoke(command)
+    options = []
+    project_options = []
+
+    if File.file? core_config_file
+      require 'sk/platform.rb'
+
+      options = [
+	'-f' + core_config_file,
+      ]
+      ENV.update Hash[
+        'core.PROJECT_OFFSET' => File.join(project_offset),
+        'core.CWD_FROM_TOP' => File.join(cwd_from_top),
+        'core.CWD_DOT' => File.join([ '', *cwd_from_top[1..-1] ]),
+        'core.COMMAND' => File.join(expanded_script_location, script_name),
+        'core.CONFIG' => File.join(config_location), 
+	'core.CWD' => File.join(cwd),
+        'core.TOP' => File.join(top),
+        'core.PLATFORM' => SK::Platform.current.name
+      ]
+
+      if project_config_file
+	load project_config_file, false
+	project_options = GmakeConfig.new.options
+      end
+    end
+    exec command, *(options + project_options + ARGV)
+  end
+end
+
+Application.new.start

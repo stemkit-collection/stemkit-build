@@ -1,0 +1,50 @@
+
+The Software Build Framework based on GNU make
+==============================================
+
+It makes a shift in thinking of Makefiles as specifying what to build rather
+then how to build. How-to-build part is also present, of course. However, this
+information is separated into config files, loaded right after gmake
+invocation. There's no need to repeated it or in any way reference in
+individual GMakefiles in a source hierarchy.  
+
+Another prominent feature is that directories are not changed during the build
+process while allowing hierarchal source tree traversal and softwre rebuild in
+individual project directories. All paths are built dynamically on invocation
+for the whole project, relative to the current directory at the moment. It has
+the following benefits among many others:
+
+- Speeding up of the build process as no changing directories takes place
+
+- Better dependency awareness even between sibling directories so figuring out
+  what code shell be rebuilt is more precise 
+
+- All diagnostic and error messages about files being rebuilt are relative to
+  the current directory, so they may be used to fire an editor session
+  automatically.
+
+The framework relies on several presumption about the project development tree
+structure: 
+
+- The source tree top is called 'src'
+
+- Binaries will be placed into a parallel hierachy starting from the directory
+  'bin' on the same level as 'src'
+
+- Project libraries will be located in directory 'lib' under 'src' or one
+  level below 'src', library header files will be located in the corresponding
+  directory in a parallel include hierarchy, starting from directory 'include'
+  on the same level as 'lib'.
+
+- Every directory starting from 'src' has file GMakefile that in the very
+  least specify what sub-directories to include in the build process.
+
+- Every directory in the build proces must be mentioned in its parent
+  directory's GMakefile.
+
+NOTE: GNU make version 3.80 or higher required.  Earlier versions will not
+work as the framework makes heavy use of 'eval' function and recursive
+variable expansion, that became available only since the specified version.
+
+Please read also comments in the beginning of the scripts/gmake file. It is a
+Ruby script.

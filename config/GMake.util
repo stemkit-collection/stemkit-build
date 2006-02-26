@@ -1,0 +1,18 @@
+# vim: set ft=make:
+# Copyright (c) 2005, Gennady Bystritsky <bystr@mac.com>
+# 
+# Distributed under the MIT Licence.
+# This is free software. See 'LICENSE' for details.
+# You must read and accept the license prior to use.
+
+# Here no indentation in rules as well (see comments in GMake.rules).
+# Otherwise the ident will be prepended to the resulting strings, that
+# may not be the disired outcome.
+#
+define util.bin-object
+${addprefix $(system.BINDIR)/,${addsuffix .o,${basename $(1)}}}
+endef
+
+define util.lib-name
+${addprefix lib,${addsuffix .a,$(1)}}
+endef

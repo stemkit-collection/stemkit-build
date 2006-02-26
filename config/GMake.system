@@ -1,0 +1,199 @@
+# vim: set ft=make:
+# Copyright (c) 2005, Gennady Bystritsky <bystr@mac.com>
+# 
+# Distributed under the MIT Licence.
+# This is free software. See 'LICENSE' for details.
+# You must read and accept the license prior to use.
+
+# A special care is taken here not to use variables for holding temporary 
+# values. It is because most of the rules here are evaluated later so 
+# variable assignments will not work until that time thus making it 
+# impossible to use the value here # anyway. One can try to postpone 
+# variable expansion until later time too, however in this case the value 
+# of that variable is not guaranteed to be correct.
+#
+# On the other hand, variable expansions work fine here, including values
+# for parameters performed by function "call". That's exactly what is used
+# here where need for termporary arises. To save on names and indicate a
+# special designation, a function may have a corresponding function 
+# with the name capitalized. Capitalized functions usually accept cooked 
+# parameter values to be used in dependency clauses.
+#
+# Also in rules expanded be function "foreach" extra empty lines at the end
+# and sometimes in the beginning are needed so that expanded values are not
+# joined together.
+#
+
+system.CATEGORIES := lib exe depend reloc obj test
+
+define system.declare-category
+
+  .PHONY: $(1) $(1)@ $(1)@$(core.CWD_DOT)
+  .PHONY: clean-$(1) clean-$(1)@ clean-$(1)@$(core.CWD_DOT)
+
+  $(1) clean-$(1)::; @true
+
+endef
+
+define system.setup-environment-before
+  .PHONY: all clean binclean
+
+  all::
+
+  ${foreach _category,$(system.CATEGORIES),${call system.declare-category,$(_category)}}
+
+  all:: lib exe
+  clean:: clean-obj clean-reloc clean-lib clean-exe
+  binclean::; @$${call action.rmdir,$(core.TOP)/bin$(core.CWD_DOT)}
+
+  system.BINDIR := $(core.TOP)/bin
+  system.SRCDIR := $(core.TOP)/src
+
+  $(core.TOP)/bin/.dirinfo:; @$${call action.mkdir,$(core.TOP)/bin}
+
+endef
+
+define system.associate-dot-category
+
+  $(1):: $(1)@$(core.CWD_DOT)
+  clean-$(1):: clean-$(1)@$(core.CWD_DOT)
+
+endef
+
+define system.setup-environment-after
+  ${foreach _category,$(system.CATEGORIES),${call system.associate-dot-category,$(_category)}}
+endef
+
+define system.load-top-makefile
+  ${call system.load-makefile-from,}
+endef
+
+define system.load-makefile-from
+  system.DOT := $(1)
+  system.SRCDIR := $(core.TOP)/src$(1)
+  system.BINDIR := $(core.TOP)/bin$(1)
+
+  ${call core.load,$(core.TOP)/src$(1)/GMakefile}
+endef
+
+# This rule make a category goal (and a matching clean- goal) in the DOT 
+# directory depend on a corresponding category in a specified subdirectory 
+# to make a chain of dependencies to be triggered from any level depending 
+# on the current directory.
+#
+define system.promote-category
+  .PHONY: $(1)@$(2)/$(3) clean-$(1)@$(2)/$(3)
+  $(1)@$(2):: $(1)@$(2)/$(3)
+  clean-$(1)@$(2):: clean-$(1)@$(2)/$(3)
+
+endef
+
+define system.make-subdir
+  ${call system.load-makefile-from,$(1)/$(2)}
+  ${foreach _category,$(system.CATEGORIES),${call system.promote-category,$(_category),$(1),$(2)}}
+
+  system.DOT := $(1)
+
+  $(core.TOP)/bin$(1)/$(2)/.dirinfo: $(core.TOP)/bin$(1)/.dirinfo; @$${call action.mkdir,$(core.TOP)/bin$(1)/$(2)}
+
+endef
+
+# Here we define a real dependency loading function only if a make goal 
+# contains 'clean', so that no dependency file loading will take place. 
+# Otherwise, all subsequent invocation of a 'clean' target will first 
+# rebuild dependencies to immediatelly remove them among others. And 
+# that's kind of not neat.
+#
+ifeq (,${findstring clean,$(MAKECMDGOALS)})
+  define system.load-depend
+    ${call core.load-if-present,$(1)}
+  endef
+else
+  define system.load-depend
+  endef
+endif
+
+define system.MAKE-DEPEND
+  ${call system.load-depend,$(1)}
+  ${call system.assign-category,depend,$(1)}
+
+  $(1) : $(2); @$${call action.depend${suffix $(2)}}
+
+endef
+
+define system.make-depend
+  ${call system.MAKE-DEPEND,$(1:.o=.dep),$(2)}
+endef
+
+define system.MAKE-OBJECT
+  ${call system.make-depend,$(1),$(2)}
+  ${call system.assign-category,obj,$(1)}
+
+  $(1) : $(2); @$${call action.compile$${suffix $(2)}}
+
+endef
+
+define system.make-objects
+  ${foreach object,$(1),${call system.MAKE-OBJECT,${call util.bin-object,$(object)},$(system.SRCDIR)/$(object)}}
+endef
+
+define system.MAKE-STATIC-LIBRARY
+  ${call system.assign-category,lib,$(1)}
+
+  $(1) : $(2); @$${call action.static-library,$(2)}
+
+endef
+
+define system.make-static-library
+  ${call system.make-objects,$(2)}
+  ${call system.MAKE-STATIC-LIBRARY,$(system.BINDIR)/${call util.lib-name,$(1)},${call util.bin-object,$(2)}}
+endef
+
+define system.RELOC
+
+  $(1) : $(2)
+
+endef
+
+define system.make-reloc
+  ${call system.assign-category,reloc,$(1)}
+
+  ${foreach _object,$(2),${call system.RELOC,$(1),$(_object)}}
+
+  $(1) :
+	@$${call action.reloc,$(2)}
+
+endef
+
+define system.assign-category
+  $(1)@$(system.DOT):: $(2)
+
+  $(2) : $(system.BINDIR)/.dirinfo
+
+  clean-$(1)@$(system.DOT)::; @$${call action.rm,$(2)}
+
+endef
+
+define system.MAKE-PROGRAM
+  ${call system.make-reloc,$(2),${call util.bin-object,$(3)}}
+  ${call system.assign-category,exe,$(1)}
+
+  $(1) : $(2)
+	@$${call action.link,$(2)}
+
+endef
+
+define system.MAKE-TEST-PROGRAM
+  ${call system.MAKE-PROGRAM,$(1),$(2),$(3)}
+  ${call system.assign-category,test,$(1)}
+endef
+
+define system.make-program
+  ${call system.make-objects,$(2)}
+  ${call system.MAKE-PROGRAM,$(system.BINDIR)/$(1),$(system.BINDIR)/$(1).reloc.o,$(2)}
+endef
+
+define system.make-test-program
+  ${call system.make-objects,$(2)}
+  ${call system.MAKE-TEST-PROGRAM,$(system.BINDIR)/$(1),$(system.BINDIR)/$(1).reloc.o,$(2)}
+endef

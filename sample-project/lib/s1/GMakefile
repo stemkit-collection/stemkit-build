@@ -1,0 +1,7 @@
+# vim: set ft=make:
+
+library := s1
+objects := a.c b.c
+
+${call make-static-library, $(library), $(objects)}
+${call make-subdirs, test}

@@ -1,0 +1,34 @@
+# vim: set ft=make:
+# Copyright (c) 2005, Gennady Bystritsky <bystr@mac.com>
+# 
+# Distributed under the MIT Licence.
+# This is free software. See 'LICENSE' for details.
+# You must read and accept the license prior to use.
+
+# Here all rules must go without any indent, especially rules that
+# generate actula make dependencies, as the indent will be added to 
+# every line of the evaluated result.
+#
+define make-subdirs
+${foreach directory,$(1),${call make-subdir,$(directory)}}
+endef
+
+define make-subdir
+${eval ${call system.make-subdir,$(system.DOT),$(1)}}
+endef
+
+define make-static-library
+${eval ${call system.make-static-library,${strip $(1)},$(2)}}
+endef
+
+define make-library
+${call make-static-library}
+endef
+
+define make-program
+${eval ${call system.make-program,${strip $(1)},$(2)}}
+endef
+
+define make-test-program
+${eval ${call system.make-test-program,${strip $(1)},$(2)}}
+endef
