@@ -28,8 +28,6 @@ end
 class Application < SK::Application
   def start
     handle_errors {
-      self.verbose = ENV['TRACE'].to_s.split.include?(script_name)
-
       commands = find_in_path(script_name)
       commands.shift while commands.first == $0
 
