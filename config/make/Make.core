@@ -1,8 +1,21 @@
 # vim: ft=make: sw=2:
 
-ifdef SK_MAKE_LOCAL_MAKEFILE 
-  include $(SK_MAKE_LOCAL_MAKEFILE)
-else
-  -include makefile
-endif
+define core.trace
+  ${if ${findstring $(1),$(TRACE)},${warning <${strip $(2)}>}}
+endef
 
+define core.trace-current-location
+  ${call core.trace,core, Got here}
+endef
+
+define core.load-local-makefile-if-present
+  ${eval ${if $(SK_MAKE_LOCAL_MAKEFILE),include $(SK_MAKE_LOCAL_MAKEFILE),-include makefile}}
+endef
+
+${call core.trace-current-location}
+
+ifdef SK_MAKE_PROJECT_MAKEFILE 
+  include $(SK_MAKE_PROJECT_MAKEFILE)
+else
+  ${call core.load-local-makefile-if-present}
+endif

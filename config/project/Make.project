@@ -1,0 +1,2 @@
+${call core.trace-current-location}
+${call core.load-local-makefile-if-present}
