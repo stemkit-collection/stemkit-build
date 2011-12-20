@@ -26,7 +26,8 @@ class Application < SK::ScopingLauncher
   end
 
   def project_scope_settings
-    { :project_makefile => project_makefile
+    { :project_makefile => project_makefile,
+      :project_top => local_scope_top
     }
   end
 
