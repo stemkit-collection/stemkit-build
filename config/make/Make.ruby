@@ -1,4 +1,6 @@
 ${call core.trace-current-location}
+${call core.load-local-makefile-if-present}
+
 # The weird series of -e options is needed here because make adds option -c
 # to execute the command line, causing ruby syntax errors. So here we simply
 # force numeric variable 'c' by assigning 0. '-c' after the last -e will 
@@ -52,31 +54,41 @@ define invoke_spec
 endef
 
 all:: 
-	@ puts "Use 'make [j]tests' or 'make [j]specs' for unit tests or specs ('j' for JRuby)."
+	@ puts "Use 'make [j]test[s]' or 'make [j]spec[s]' for unit tests or specs ('j' for JRuby)."
 
-test tests spec specs jtest jtests jspec jspecs:: 
-	@ %w[ $(ITEMS) ].empty? && Dir['*/makefile'].map { |item| system "$(MAKE) -C #{File.dirname(item)} $(@)" or exit(2) }
+test spec jtest jspec:: 
+	@ %w[ $(ITEMS) ].empty? && Dir['*/makefile'].map { |item| system "make -C #{File.dirname(item)} $(@)" or exit(2) }
 
-test tests:: tests-local
-jtest jtests:: jtests-local
+test:: test-local
+jtest:: jtest-local
 
-spec specs:: specs-local
-jspec jspecs:: jspecs-local
+spec:: spec-local
+jspec:: jspec-local
 
-test-local tests-local:: 
+tests:: test
+jtests:: jtest
+specs:: spec
+jspecs:: jspec
+
+tests-local local-test local-tests:: test-local
+specs-local local-spec local-specs:: spec-local
+jtests-local local-jtest local-jtests:: jtest-local
+jspecs-local local-jspec local-jspecs:: jspec-local
+
+test-local:: 
 	@ Dir['*.rb'].each { |item| system "$(RUBY) -I$(RUBY_EXTRA_LOADPATH) #{item}" or exit(2) }
 
-jtest-local jtests-local:: 
+jtest-local::
 	@ items = %w[ $(ITEMS) ]; Dir['*.rb'].each { |item| next if items.empty? == false && items.include?(item) == false; system %Q[ $(JRUBY) -e '$$:.concat ENV["RUBY_EXTRA_LOADPATH"].split(":"); $$:.delete("."); $$:.delete(""); file = #{File.expand_path(item).inspect}; $$0.replace file; load file'] or exit(2) }
 
-spec-local specs-local:: 
+spec-local:: 
 	@ ${strip ${call invoke_spec, $(RUBY), --color -fs}}
 
-test-local tests-local:: 
+test-local:: 
 	@ ${strip ${call invoke_spec, $(RUBY)}}
 
-jspec-local jspecs-local:: 
+jspec-local:: 
 	@ ${strip ${call invoke_spec, $(JRUBY), --color -fs}}
 
-jtest-local jtests-local:: 
+jtest-local:: 
 	@ ${strip ${call invoke_spec, $(JRUBY)}}
