@@ -12,6 +12,23 @@ define core.load-local-makefile-if-present
   ${eval ${if $(SK_MAKE_LOCAL_MAKEFILE),include $(SK_MAKE_LOCAL_MAKEFILE),-include makefile}}
 endef
 
+define core.load-with
+  ${call core.trace,core,Loading $(1)}
+  $(2) $(1)
+endef
+
+define core.load
+  ${eval ${call core.load-with,$(1),include}}
+endef
+
+define core.load-if-present
+  ${call core.load-with,$(1),-include}
+endef
+
+define core.load-config
+  ${call core.load,${dir $(SK_MAKE_GLOBAL_MAKEFILE)}${strip $(1)}}
+endef
+
 ${call core.trace-current-location}
 
 ifdef SK_MAKE_PROJECT_MAKEFILE 

@@ -74,6 +74,7 @@ class Application < SK::ScopingLauncher
   def local_scope_selectors
     [ 
       'config/Make.project',
+      'config/make/Make.project',
       'config/project/Make.project'
     ]
   end
