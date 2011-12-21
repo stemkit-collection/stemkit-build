@@ -22,7 +22,7 @@ class Application < SK::ScopingLauncher
     update_environment global_scope_settings if global_scope?
     update_environment source_scope_settings if source_scope?
 
-    setup_local_makefile :GNUmakefile, :makefile, :Makefile
+    setup_scope_descriptors :GNUmakefile, :makefile, :Makefile
   end
 
   def project_scope_settings
@@ -33,10 +33,13 @@ class Application < SK::ScopingLauncher
     }
   end
 
-  def setup_local_makefile(*args)
+  def setup_scope_descriptors(*args)
     args.each do |_makefile|
-      break update_environment(:local_makefile => _makefile) if File.exists? _makefile.to_s
+      break update_environment :local_makefile => _makefile if File.exists? _makefile.to_s
     end
+
+    return if scope_descriptors_to_top(*args).empty?
+    update_environment :makefiles_to_top => scope_descriptors_to_top.join(' ')
   end
 
   def global_scope_settings
