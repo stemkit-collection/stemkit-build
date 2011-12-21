@@ -76,7 +76,7 @@ jtests-local local-jtest local-jtests:: jtest-local
 jspecs-local local-jspec local-jspecs:: jspec-local
 
 test-local:: 
-	@ Dir['*.rb'].each { |item| system "$(RUBY) -I$(RUBY_EXTRA_LOADPATH) #{item}" or exit(2) }
+	@ items = %w[ $(ITEMS) ]; Dir['*.rb'].each { |item| next if items.empty? == false && items.include?(item) == false; system "$(RUBY) -I$(RUBY_EXTRA_LOADPATH) #{item}" or exit(2) }
 
 jtest-local::
 	@ items = %w[ $(ITEMS) ]; Dir['*.rb'].each { |item| next if items.empty? == false && items.include?(item) == false; system %Q[ $(JRUBY) -e '$$:.concat ENV["RUBY_EXTRA_LOADPATH"].split(":"); $$:.delete("."); $$:.delete(""); file = #{File.expand_path(item).inspect}; $$0.replace file; load file'] or exit(2) }
