@@ -1,5 +1,6 @@
+# vim: ft=make: sw=2:
+
 ${call core.trace-current-location}
-${call core.load-local-makefile-if-present}
 
 # The weird series of -e options is needed here because make adds option -c
 # to execute the command line, causing ruby syntax errors. So here we simply
