@@ -5,10 +5,8 @@
 # This is free software. See 'LICENSE' for details.
 # You must read and accept the license prior to use.
 
-[ 'sk/application.rb' ].each do |a|
-  $: << ENV.to_hash['PATH'].split(':').find { |p| Dir[ p + '/' + a ].first }
-  require a
-end
+$:.concat ENV['PATH'].to_s.split(File::PATH_SEPARATOR)
+require 'tsc/application.rb'
 
 # This is a front-end for GNU make 3.80. Earlier versions will not work as the
 # framework makes heavy use of 'eval' function and recursive variable
@@ -25,7 +23,7 @@ end
 # PATH, with this script location earlier in the path. It will then filter
 # itself out when looking for the original gmake.
 #
-class Application < SK::Application
+class Application < TSC::Application
   def start
     handle_errors {
       commands = find_in_path(script_name)
@@ -118,10 +116,10 @@ class Application < SK::Application
     project_options = []
 
     if File.file? core_config_file
-      require 'sk/platform.rb'
+      require 'tsc/platform.rb'
 
       options = [
-	'-f' + core_config_file,
+        '-f' + core_config_file,
       ]
       ENV.update Hash[
         'core.PROJECT_OFFSET' => File.join(project_offset),
@@ -129,14 +127,14 @@ class Application < SK::Application
         'core.CWD_DOT' => File.join([ '', *cwd_from_top[1..-1] ]),
         'core.COMMAND' => File.join(expanded_script_location, script_name),
         'core.CONFIG' => File.join(config_location), 
-	'core.CWD' => File.join(cwd),
+        'core.CWD' => File.join(cwd),
         'core.TOP' => File.join(top),
-        'core.PLATFORM' => SK::Platform.current.name
+        'core.PLATFORM' => TSC::Platform.current.name
       ]
 
       if project_config_file
-	load project_config_file, false
-	project_options = GmakeConfig.new.options
+        load project_config_file, false
+        project_options = GmakeConfig.new.options
       end
     end
     exec command, *(options + project_options + ARGV)
