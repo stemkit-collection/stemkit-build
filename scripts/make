@@ -38,7 +38,9 @@ class Application < SK::ScopingLauncher
       break update_environment :local_makefile => _makefile if File.exists? _makefile.to_s
     end
 
+    return unless local_scope?
     return if scope_descriptors_to_top(*args).empty?
+
     update_environment :makefiles_to_top => scope_descriptors_to_top.join(' ')
   end
 
