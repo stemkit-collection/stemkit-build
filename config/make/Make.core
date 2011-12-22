@@ -4,16 +4,21 @@ define core.trace
   ${if ${findstring $(1),$(TRACE)},${warning <${strip $(2)}>}}
 endef
 
+define core.info
+  ${if ${findstring $(1),$(TRACE)},${info ... $(2) $(3)}}
+endef
+
 define core.trace-current-location
-  ${call core.trace,core, Got here}
+  ${call core.info,core,Got here,$(core.trace.LAST_LOADED_FILE)}
 endef
 
 define core.load-local-makefile-if-present
-  ${eval ${if $(SK_MAKE_LOCAL_MAKEFILE),include $(SK_MAKE_LOCAL_MAKEFILE),-include makefile}}
+  ${eval ${if $(SK_MAKE_LOCAL_MAKEFILE),${call core.load,$(SK_MAKE_LOCAL_MAKEFILE)},${call core.load-if-present,makefile}}}
 endef
 
 define core.load-with
-  ${call core.trace,core,Loading $(1)}
+  ${eval core.trace.LAST_LOADED_FILE := $(1)}
+  ${call core.trace,core2,Loading $(1)}
   $(2) $(1)
 endef
 
@@ -26,13 +31,21 @@ define core.load-if-present
 endef
 
 define core.load-config
-  ${call core.load,${dir $(SK_MAKE_GLOBAL_MAKEFILE)}${strip $(1)}}
+  ${call core.load,${dir $(core.GLOBAL_CONFIG_DIR)}${strip $(1)}}
 endef
+
+core.trace.LAST_LOADED_FILE := $(SK_MAKE_GLOBAL_MAKEFILE)
+core.GLOBAL_CONFIG_DIR := ${dir $(SK_MAKE_GLOBAL_MAKEFILE)}
 
 ${call core.trace-current-location}
 
 ifdef SK_MAKE_PROJECT_MAKEFILE 
-  include $(SK_MAKE_PROJECT_MAKEFILE)
+  define core.load-project-config
+	${call core.load,$(core.PROJECT_CONFIG_DIR)${strip $(1)}}
+  endef
+
+  core.PROJECT_CONFIG_DIR := ${dir $(SK_MAKE_PROJECT_MAKEFILE)}
+  ${call core.load,$(SK_MAKE_PROJECT_MAKEFILE)}
 else
   ${call core.load-local-makefile-if-present}
 endif
