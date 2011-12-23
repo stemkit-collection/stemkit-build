@@ -1,0 +1,8 @@
+# vim: ft=make: sw=2:
+
+${call core.trace-current-location}
+
+define util.join
+  ${foreach _item,$(1),$(_item) $(2)} ''
+endef
+

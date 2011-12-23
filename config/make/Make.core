@@ -9,7 +9,7 @@ define core.info
 endef
 
 define core.trace-current-location
-  ${call core.info,core,Got here,$(core.trace.LAST_LOADED_FILE)}
+  ${call core.info,core,Got here,$(core.LAST_LOADED_FILE)}
 endef
 
 define core.load-local-makefile-if-present
@@ -17,7 +17,7 @@ define core.load-local-makefile-if-present
 endef
 
 define core.load-with
-  ${eval core.trace.LAST_LOADED_FILE := $(1)}
+  ${eval core.LAST_LOADED_FILE := $(1)}
   ${call core.trace,core2,Loading $(1)}
   $(2) $(1)
 endef
@@ -39,11 +39,12 @@ define core.load-plugin
 endef
 
 MAKE := make
-core.trace.LAST_LOADED_FILE := $(SK_MAKE_GLOBAL_MAKEFILE)
+core.LAST_LOADED_FILE := $(SK_MAKE_GLOBAL_MAKEFILE)
 core.GLOBAL_CONFIG_DIR := ${dir $(SK_MAKE_GLOBAL_MAKEFILE)}
 
 ${call core.info,core,[$(MAKECMDGOALS)] In ${shell pwd}}
 ${call core.trace-current-location}
+${call core.load-config,Make.util}
 
 ifdef SK_MAKE_PROJECT_MAKEFILE 
   define core.load-project-config
