@@ -1,15 +1,21 @@
 # vim: ft=make: sw=2:
 
+core.trace-on = ${or ${findstring all,$(TRACE)},${findstring $(1),$(TRACE)}}
+
 define core.trace
-  ${if ${findstring $(1),$(TRACE)},${warning <${strip $(2)}>}}
+  ${if ${call core.trace-on,$(1)},${warning ### [$(1)] $(2) $(3)}}
 endef
 
 define core.info
-  ${if ${findstring $(1),$(TRACE)},${info === $(2) $(3)}}
+  ${if ${call core.trace-on,$(1)},${info ### [$(1)] $(2) $(3)}}
 endef
 
 define core.trace-current-location
-  ${call core.info,core,Got here,$(core.LAST_LOADED_FILE)}
+  ${call core.trace,core,Got here,$(core.LAST_LOADED_FILE)}
+endef
+
+define core.show-current-location
+  ${call core.info,core,Got here $(core.LAST_LOADED_FILE)}
 endef
 
 define core.load-local-makefile-if-present
@@ -18,7 +24,7 @@ endef
 
 define core.load-with
   ${eval core.LAST_LOADED_FILE := $(1)}
-  ${call core.trace,core2,Loading $(1)}
+  ${call core.trace,debug,Loading $(1)}
   $(2) $(1)
 endef
 
@@ -43,7 +49,7 @@ core.LAST_LOADED_FILE := $(SK_MAKE_GLOBAL_MAKEFILE)
 core.GLOBAL_CONFIG_DIR := ${dir $(SK_MAKE_GLOBAL_MAKEFILE)}
 
 ${call core.info,core,[$(MAKECMDGOALS)] In ${shell pwd}}
-${call core.trace-current-location}
+${call core.show-current-location}
 ${call core.load-config,Make.util}
 
 ifdef SK_MAKE_PROJECT_MAKEFILE 
