@@ -2,11 +2,15 @@
 
 define ruby.add-item-to-loadpath
   ${call core.info,ruby,Adding to LOADPATH - $(1)}
-  ruby.EXTRA_LOAD_PATH += $(1)
+  ruby.LOAD_PATH += $(1)
 endef
 
 define ruby.add-cwd-to-loadpath
   ${eval ${call ruby.add-item-to-loadpath,${dir $(core.LAST_LOADED_FILE)}}}
+endef
+
+define ruby.add-path-to-loadpath
+  ${eval ${call ruby.add-item-to-loadpath,$(PATH)}}
 endef
 
 ITEMS ?= *.rb
@@ -15,7 +19,7 @@ ${call core.show-current-location}
 ${foreach item,$(SK_MAKE_MAKEFILES_TO_TOP),${call core.load,$(item)}}
 
 define ruby.exec
-  ruby -rubygems -I$(PATH) ${addprefix -I,$(ruby.EXTRA_LOAD_PATH)} $(1) || exit $${?}
+  ruby -rubygems ${addprefix -I,$(ruby.LOAD_PATH)} $(1) || exit $${?}
 endef
 
 all:: 
