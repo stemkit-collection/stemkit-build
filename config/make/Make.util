@@ -6,3 +6,7 @@ define util.join
   ${foreach _item,$(1),$(_item) $(2)} ''
 endef
 
+define util.set-variable
+  ${call core.info,ruby,Setting variable $(1) to $(2)}
+  override $(1) = $(2)
+endef
