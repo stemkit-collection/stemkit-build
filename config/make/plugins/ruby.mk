@@ -25,10 +25,7 @@ OFFSET ?= false
 
 ruby.LOCAL_OFFSET ?= .
 
-define ruby.exec
-  ruby -rubygems ${addprefix -I,$(ruby.LOAD_PATH)} $(1) || exit $${?}
-endef
-
+local.ruby-exec = ruby -rubygems ${addprefix -I,$(ruby.LOAD_PATH)} $(1) || exit $${?}
 local.item-list = ${call util.join,${addprefix $(ruby.LOCAL_OFFSET)/,$(ITEMS)},|}
 
 all::
@@ -39,4 +36,4 @@ test::
 
 local-test::
 	@ echo Folder: $(PWD)
-	@ for item in $(ruby.LOCAL_OFFSET)/*; do case $${item} in ${local.item-list}) ${call ruby.exec,$${item}};; esac; done
+	@ for item in $(ruby.LOCAL_OFFSET)/*; do case $${item} in ${local.item-list}) ${call local.ruby-exec,$${item}};; esac; done
