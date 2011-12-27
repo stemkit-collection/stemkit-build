@@ -18,11 +18,17 @@ class Application < SK::ScopingLauncher
   #########
 
   def setup
-    update_environment project_scope_settings if local_scope?
+    setup_scope_descriptors :GNUmakefile, :makefile, :Makefile
+
     update_environment global_scope_settings if global_scope?
     update_environment source_scope_settings if source_scope?
+    if local_scope?
+      update_environment project_scope_settings
 
-    setup_scope_descriptors :GNUmakefile, :makefile, :Makefile
+      config('build.yaml', :spot => local_scope_top.join('config')).tap { |_config|
+        update_environment _config.properties, :prefix => :product, :upcase => true
+      }
+    end
 
     config('.buildrc', :uproot => true, :home => true).tap { |_config|
       update_environment _config.properties(:make, :build), :prefix => false, :upcase => false
