@@ -18,7 +18,7 @@ class Application < SK::ScopingLauncher
   #########
 
   def setup
-    setup_scope_descriptors :GNUmakefile, :makefile, :Makefile
+    setup_scope_descriptors :makefile, :Makefile
 
     update_environment global_scope_settings if global_scope?
     update_environment source_scope_settings if source_scope?

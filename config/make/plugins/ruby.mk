@@ -32,7 +32,7 @@ all::
 	@ echo "Available targets: test local-test"
 
 test::
-	@ find . -name makefile -print | while read path; do (cd `dirname $${path}` && $(MAKE) local-$(@)) || exit $${?}; done
+	@ find . -name '[Mm]akefile' -print | while read path; do (cd `dirname $${path}` && $(MAKE) local-$(@)) || exit $${?}; done
 
 local-test::
 	@ echo Folder: $(PWD)
