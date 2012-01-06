@@ -35,6 +35,18 @@ class Application < SK::ScopingLauncher
     }
   end
 
+  def current_location
+    @current_location ||= begin
+      ARGV.index('-C').tap { |_index|
+        break unless _index
+        return File.expand_path ARGV.slice(_index.next).tap { |_path|
+          raise 'Wrong -C specification' unless _path
+        }
+      }
+      super
+    end
+  end
+
   def project_scope_settings
     { :project_makefile => project_makefile,
       :project_top => local_scope_top,
@@ -45,7 +57,7 @@ class Application < SK::ScopingLauncher
 
   def setup_scope_descriptors(*args)
     args.each do |_makefile|
-      break update_environment :local_makefile => _makefile if File.exists? _makefile.to_s
+      break update_environment :local_makefile => _makefile if Pathname.new(current_location).join(_makefile.to_s).exist?
     end
 
     return unless local_scope?
