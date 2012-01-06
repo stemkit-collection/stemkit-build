@@ -36,15 +36,16 @@ class Application < SK::ScopingLauncher
   end
 
   def current_location
-    @current_location ||= begin
-      ARGV.index('-C').tap { |_index|
-        break unless _index
-        return File.expand_path ARGV.slice(_index.next).tap { |_path|
-          raise 'Wrong -C specification' unless _path
-        }
+    @current_location ||= Pathname.new catch(:found) {
+      ARGV.inject(false) { |_found, _item|
+        case _item
+          when _found then throw :found, _item
+          when _item == '-C' then true
+          when _item =~ %r{^--directory=(.*)$} then throw :found, $1
+        end
       }
       super
-    end
+    }
   end
 
   def project_scope_settings
@@ -57,7 +58,7 @@ class Application < SK::ScopingLauncher
 
   def setup_scope_descriptors(*args)
     args.each do |_makefile|
-      break update_environment :local_makefile => _makefile if Pathname.new(current_location).join(_makefile.to_s).exist?
+      break update_environment :local_makefile => _makefile if exists_in_current?(_makefile)
     end
 
     return unless local_scope?
