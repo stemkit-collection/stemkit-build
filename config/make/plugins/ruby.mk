@@ -13,20 +13,12 @@ define ruby.add-path-to-loadpath
   ${eval ${call ruby.add-item-to-loadpath,$(PATH)}}
 endef
 
-define ruby.set-local-offset
-  ${if ${findstring true,$(OFFSET)},${eval ${call util.set-variable,ruby.LOCAL_OFFSET,$(1)}}}
-endef
-
 ${call core.show-current-location}
 ${foreach item,$(SK_MAKE_MAKEFILES_TO_TOP),${call core.load,$(item)}}
 
 ITEMS ?= *.rb
-OFFSET ?= false
-
-ruby.LOCAL_OFFSET ?= .
 
 local.ruby-exec = ruby -rubygems ${addprefix -I,$(ruby.LOAD_PATH)} $(1) || exit $${?}
-local.item-list = ${call util.join,${addprefix $(ruby.LOCAL_OFFSET)/,$(ITEMS)},|}
 
 all::
 	@ echo "Available targets: test local-test"
@@ -36,4 +28,4 @@ test::
 
 local-test::
 	@ echo Folder: $(PWD)
-	@ for item in $(ruby.LOCAL_OFFSET)/*; do case $${item} in ${local.item-list}) ${call local.ruby-exec,$${item}};; esac; done
+	@ for item in *; do case $${item} in ${call util.join,$(ITEMS),|}) ${call local.ruby-exec,$${item}};; esac; done
