@@ -37,16 +37,20 @@ class Application < SK::ScopingLauncher
   end
 
   def current_location
-    @current_location ||= Pathname.new catch(:found) {
-      ARGV.inject(false) { |_found, _item|
-        case _item
-          when _found then throw :found, _item
-          when _item == '-C' then true
-          when _item =~ %r{^--directory=(.*)$} then throw :found, $1
-        end
-      }
-      super
+    @current_location ||= scan_cmdline_for_folder.tap { |_path|
+      break _path ? Pathname.new(_path).expand_path : super
     }
+  end
+
+  def scan_cmdline_for_folder
+    ARGV.inject(false) { |_found, _item|
+      case
+        when _found then return _item
+        when _item == '-C' then true
+        when _item =~ %r{^--directory=(.*)$} then return $1
+      end
+    }
+    nil
   end
 
   def project_scope_settings
