@@ -31,6 +31,7 @@ class Application < SK::ScopingLauncher
     end
 
     config('.buildrc', :uproot => true, :home => true).tap { |_config|
+      self.transparent = _config.attribute(:transparent)
       update_environment _config.properties(:make, :build), :prefix => false, :upcase => false
     }
   end
