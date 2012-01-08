@@ -6,7 +6,7 @@ It makes a shift in thinking of Makefiles as specifying what to build rather
 then how to build. How-to-build part is also present, of course. However, this
 information is separated into config files, loaded right after gmake
 invocation. There's no need to repeated it or in any way reference in
-individual GMakefiles in a source hierarchy.  
+individual GMakefiles in a source hierarchy.
 
 Another prominent feature is that directories are not changed during the build
 process while allowing hierarchal source tree traversal and softwre rebuild in
@@ -17,14 +17,14 @@ the following benefits among many others:
 - Speeding up of the build process as no changing directories takes place
 
 - Better dependency awareness even between sibling directories so figuring out
-  what code shell be rebuilt is more precise 
+  what code shell be rebuilt is more precise
 
 - All diagnostic and error messages about files being rebuilt are relative to
   the current directory, so they may be used to fire an editor session
   automatically.
 
 The framework relies on several presumption about the project development tree
-structure: 
+structure:
 
 - The source tree top is called 'src'
 

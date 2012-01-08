@@ -1,22 +1,22 @@
 # vim: set ft=make:
 # Copyright (c) 2005, Gennady Bystritsky <bystr@mac.com>
-# 
+#
 # Distributed under the MIT Licence.
 # This is free software. See 'LICENSE' for details.
 # You must read and accept the license prior to use.
 
-# A special care is taken here not to use variables for holding temporary 
-# values. It is because most of the rules here are evaluated later so 
-# variable assignments will not work until that time thus making it 
-# impossible to use the value here # anyway. One can try to postpone 
-# variable expansion until later time too, however in this case the value 
+# A special care is taken here not to use variables for holding temporary
+# values. It is because most of the rules here are evaluated later so
+# variable assignments will not work until that time thus making it
+# impossible to use the value here # anyway. One can try to postpone
+# variable expansion until later time too, however in this case the value
 # of that variable is not guaranteed to be correct.
 #
 # On the other hand, variable expansions work fine here, including values
 # for parameters performed by function "call". That's exactly what is used
 # here where need for termporary arises. To save on names and indicate a
-# special designation, a function may have a corresponding function 
-# with the name capitalized. Capitalized functions usually accept cooked 
+# special designation, a function may have a corresponding function
+# with the name capitalized. Capitalized functions usually accept cooked
 # parameter values to be used in dependency clauses.
 #
 # Also in rules expanded be function "foreach" extra empty lines at the end
@@ -76,9 +76,9 @@ define system.load-makefile-from
   ${call core.load,$(core.TOP)/src$(1)/GMakefile}
 endef
 
-# This rule make a category goal (and a matching clean- goal) in the DOT 
-# directory depend on a corresponding category in a specified subdirectory 
-# to make a chain of dependencies to be triggered from any level depending 
+# This rule make a category goal (and a matching clean- goal) in the DOT
+# directory depend on a corresponding category in a specified subdirectory
+# to make a chain of dependencies to be triggered from any level depending
 # on the current directory.
 #
 define system.promote-category
@@ -98,10 +98,10 @@ define system.make-subdir
 
 endef
 
-# Here we define a real dependency loading function only if a make goal 
-# contains 'clean', so that no dependency file loading will take place. 
-# Otherwise, all subsequent invocation of a 'clean' target will first 
-# rebuild dependencies to immediatelly remove them among others. And 
+# Here we define a real dependency loading function only if a make goal
+# contains 'clean', so that no dependency file loading will take place.
+# Otherwise, all subsequent invocation of a 'clean' target will first
+# rebuild dependencies to immediatelly remove them among others. And
 # that's kind of not neat.
 #
 ifeq (,${findstring clean,$(MAKECMDGOALS)})

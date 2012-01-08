@@ -1,6 +1,6 @@
 # vim: set ft=make:
 # Copyright (c) 2005, Gennady Bystritsky <bystr@mac.com>
-# 
+#
 # Distributed under the MIT Licence.
 # This is free software. See 'LICENSE' for details.
 # You must read and accept the license prior to use.
@@ -9,7 +9,7 @@ define core.trace
   ${if ${findstring $(1),$(TRACE)},${warning <$(2)>}}
 endef
 
-# A double dollar sign makes core.trace evaluate at the same time as 
+# A double dollar sign makes core.trace evaluate at the same time as
 # include. This fixes the problem in the case an included makefile is
 # empty. It prevents printing the message way before actual loadiing
 # take place.
