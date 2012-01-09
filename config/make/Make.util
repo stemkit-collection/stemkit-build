@@ -3,7 +3,7 @@
 ${call core.show-current-location}
 
 define util.join
-  ${foreach _item,$(1),$(_item) $(2)} ''
+  ${addsuffix $(2),$(1)}
 endef
 
 define util.set-variable

@@ -16,16 +16,27 @@ endef
 ${call core.show-current-location}
 ${foreach item,$(SK_MAKE_MAKEFILES_TO_TOP),${call core.load,$(item)}}
 
-ITEMS ?= *.rb
+ITEMS ?= *
 
 local.ruby-exec = ruby -rubygems ${addprefix -I,$(ruby.LOAD_PATH)} $(1) || exit $${?}
+local.rspec-exec = ${call local.ruby-exec,-rubygems -S rspec --require sk/spec/config $(1)}
 
 all::
-	@ echo "Available targets: test local-test"
+	@ echo "Available targets: test(s) local-test(s) spec(s) local-spec(s)"
 
-test::
-	@ find . -name '[Mm]akefile' -print | while read path; do (cd `dirname $${path}` && $(MAKE) local-$(@)) || exit $${?}; done
+tests:: test
+specs:: spec
+local-tests:: local-test
+local-specs:: local-spec
+
+test spec::
+	@ find . -name '[Mm]akefile' -print | while read path; do $(MAKE) -C `dirname $${path}` local-$(@) || exit $${?}; done
+
+local-test local-spec::
+	@ echo Folder: $(CURDIR)
 
 local-test::
-	@ echo Folder: $(PWD)
-	@ for item in *; do case $${item} in ${call util.join,$(ITEMS),|}) ${call local.ruby-exec,$${item}};; esac; done
+	@ for item in *; do case $${item} in ${call util.join,${addsuffix [-_]test,$(ITEMS)} $(ITEMS),.rb |} '') ${call local.ruby-exec,$${item}};; esac; done
+
+local-spec::
+	@ for item in *; do case $${item} in ${call util.join,$(ITEMS),[-_]spec.rb |} '') ${call local.rspec-exec,$${item}};; esac; done
