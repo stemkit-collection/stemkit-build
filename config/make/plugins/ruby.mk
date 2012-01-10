@@ -19,7 +19,7 @@ ${foreach item,$(SK_MAKE_MAKEFILES_TO_TOP),${call core.load,$(item)}}
 ITEMS ?= *
 
 local.ruby-exec = ruby -rubygems ${addprefix -I,$(ruby.LOAD_PATH)} $(1) || exit $${?}
-local.rspec-exec = ${call local.ruby-exec,-rubygems -S rspec --require sk/spec/config $(1)}
+local.rspec-exec = ${call local.ruby-exec,-S rspec --require sk/spec/config $(1)}
 
 all::
 	@ echo "Available targets: test(s) local-test(s) spec(s) local-spec(s)"
@@ -36,7 +36,7 @@ local-test local-spec::
 	@ echo Folder: $(CURDIR)
 
 local-test::
-	@ for item in *; do case $${item} in ${call util.join,${addsuffix [-_]test,$(ITEMS)} $(ITEMS),.rb |} '') ${call local.ruby-exec,$${item}};; esac; done
+	@ for item in *; do case $${item} in ${call util.join,${addsuffix [-_]test,$(ITEMS)} $(ITEMS),.rb |} '') case $${item} in *[-_]spec.rb) ${call local.rspec-exec,$${item}};; *) ${call local.ruby-exec,$${item}};; esac;; esac; done
 
 local-spec::
-	@ for item in *; do case $${item} in ${call util.join,$(ITEMS),[-_]spec.rb |} '') ${call local.rspec-exec,$${item}};; esac; done
+	@ for item in *; do case $${item} in ${call util.join,$(ITEMS),[-_]spec.rb |} '') ${call local.rspec-exec,--color -fs $${item}};; esac; done
