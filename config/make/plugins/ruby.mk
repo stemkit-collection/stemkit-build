@@ -6,7 +6,7 @@ define ruby.add-item-to-loadpath
 endef
 
 define ruby.add-cwd-to-loadpath
-  ${eval ${call ruby.add-item-to-loadpath,${dir $(core.LAST_LOADED_FILE)}}}
+  ${eval ${call ruby.add-item-to-loadpath,${dir $(core.LAST_LOADED_FILE)}${1}}}
 endef
 
 define ruby.add-path-to-loadpath
