@@ -22,18 +22,21 @@ class Application < SK::ScopingLauncher
 
     update_environment global_scope_settings if global_scope?
     update_environment source_scope_settings if source_scope?
+
+    config('.buildrc', :uproot => true, :home => true).tap { |_config|
+      self.transparent = _config.attribute(:transparent)
+      update_environment _config.properties(:make, :build), :prefix => false, :upcase => false
+    }
+
     if local_scope?
       update_environment project_scope_settings
 
       config('build.yaml', :spot => local_scope_top.join('config')).tap { |_config|
         update_environment _config.properties, :prefix => :product, :upcase => true
       }
+    else
+      self.transparent = true
     end
-
-    config('.buildrc', :uproot => true, :home => true).tap { |_config|
-      self.transparent = _config.attribute(:transparent)
-      update_environment _config.properties(:make, :build), :prefix => false, :upcase => false
-    }
   end
 
   def current_location
