@@ -53,7 +53,7 @@ define core.load-plugin
   ${call core.load-config,plugins/${strip $(1)}.mk}
 endef
 
-MAKE := make
+MAKE := $(SK_MAKE_SELF_PATH)
 core.LAST_LOADED_FILE := $(SK_MAKE_GLOBAL_MAKEFILE)
 core.LOADED_FILES := $(SK_MAKE_GLOBAL_MAKEFILE)
 core.GLOBAL_CONFIG_DIR := ${dir $(SK_MAKE_GLOBAL_MAKEFILE)}

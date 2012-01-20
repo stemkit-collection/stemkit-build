@@ -14,8 +14,23 @@ $:.concat ENV['PATH'].to_s.split(File::PATH_SEPARATOR)
 require 'sk/scoping-launcher.rb'
 
 class Application < SK::ScopingLauncher
+  in_generator_context do |_content|
+    file = File.basename(target)
+    directory = File.join(self.class.installation_top, 'bin')
+    original = File.join(directory, 'originals', file)
+
+    _content << '#!/usr/bin/env ' + figure_ruby_path
+    _content << TSC::PATH.current.front(directory).to_ruby_eval
+    _content << "ORIGINAL = #{original.inspect}"
+    _content << IO.readlines(__FILE__).slice(1..-1)
+  end
+
   protected
   #########
+
+  def original_command
+    defined?(ORIGINAL) ? ORIGINAL : super
+  end
 
   def setup
     setup_scope_descriptors :makefile, :Makefile
@@ -76,7 +91,8 @@ class Application < SK::ScopingLauncher
   end
 
   def global_scope_settings
-    { :global_makefile => global_makefile
+    { :global_makefile => global_makefile,
+      :self_path => __FILE__
     }
   end
 
