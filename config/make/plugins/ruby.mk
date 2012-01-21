@@ -10,7 +10,7 @@ define ruby.add-cwd-to-loadpath
 endef
 
 define ruby.add-path-to-loadpath
-  ${eval ${call ruby.add-item-to-loadpath,$(PATH)}}
+  ${eval ${call ruby.add-item-to-loadpath,${subst :, ,$(PATH)}}}
 endef
 
 ${call core.show-current-location}
@@ -19,7 +19,7 @@ ${foreach item,$(SK_MAKE_MAKEFILES_TO_TOP),${call core.load,$(item)}}
 ITEMS ?= *
 
 local.ruby-exec = ruby -rubygems ${addprefix -I,$(ruby.LOAD_PATH)} $(1) || exit $${?}
-local.rspec-exec = ${call local.ruby-exec,-S rspec --require sk/spec/config $(1)}
+local.rspec-exec = rspec -rubygems ${addprefix -I,$(ruby.LOAD_PATH)} --require sk/spec/config $(1) || exit $${?}
 
 all::
 	@ echo "Available targets: test(s) local-test(s) spec(s) local-spec(s)"
