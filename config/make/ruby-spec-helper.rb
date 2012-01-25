@@ -10,4 +10,21 @@
 =end
 
 require 'ruby-test-helper.rb'
-require 'sk/spec/config.rb'
+require 'rspec'
+
+RSpec.configure do |config|
+  # == Mock Framework
+  #
+  # RSpec uses it's own mocking framework by default. If you prefer to
+  # use mocha, flexmock or RR, uncomment the appropriate line:
+  #
+  config.mock_with :rspec
+
+  # config.mock_with :flexmock
+  # config.mock_with :rr
+end
+
+begin
+  require 'spec_helper'
+rescue LoadError
+end
