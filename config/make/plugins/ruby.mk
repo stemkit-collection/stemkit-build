@@ -18,8 +18,8 @@ ${foreach item,$(SK_MAKE_MAKEFILES_TO_TOP),${call core.load,$(item)}}
 
 ITEMS ?= *
 
-local.ruby-exec = ruby -rubygems ${addprefix -I,$(ruby.LOAD_PATH)} $(1) || exit $${?}
-local.rspec-exec = rspec -rubygems ${addprefix -I,$(ruby.LOAD_PATH)} --require sk/spec/config $(1) || exit $${?}
+local.ruby-exec = echo $(1); ruby -rubygems ${addprefix -I,$(ruby.LOAD_PATH)} $(1) || exit $${?}
+local.rspec-exec = echo $(1); rspec -rubygems ${addprefix -I,$(ruby.LOAD_PATH)} --require sk/spec/config $(1) || exit $${?}
 
 all::
 	@ echo "Available targets: test(s) local-test(s) spec(s) local-spec(s)"
