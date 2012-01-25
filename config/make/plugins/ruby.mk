@@ -1,8 +1,11 @@
 # vim: ft=make: sw=2:
 
+${call core.show-current-location}
+
 define ruby.add-item-to-loadpath
   ${call core.info,ruby,Adding to LOADPATH - $(1)}
-  ruby.LOAD_PATH += $(1)
+  override ruby.EXTRA_LOAD_PATH += $(1)
+  export ruby.EXTRA_LOAD_PATH
 endef
 
 define ruby.add-cwd-to-loadpath
@@ -10,7 +13,11 @@ define ruby.add-cwd-to-loadpath
 endef
 
 define ruby.add-path-to-loadpath
-  ${eval ${call ruby.add-item-to-loadpath,${subst :, ,$(PATH)}}}
+  ${eval ${call util.set-env-variable,ruby.USE_PATH,true}}
+endef
+
+define ruby.tweak-loaded-from
+  ${eval ${call util.set-env-variable,ruby.LOADED_FROM,$(1)}}
 endef
 
 ${call core.show-current-location}
@@ -18,8 +25,8 @@ ${foreach item,$(SK_MAKE_MAKEFILES_TO_TOP),${call core.load,$(item)}}
 
 ITEMS ?= *
 
-local.ruby-exec = echo $(1); ruby -rubygems ${addprefix -I,$(ruby.LOAD_PATH)} $(1) || exit $${?}
-local.rspec-exec = echo $(1); rspec -rubygems ${addprefix -I,$(ruby.LOAD_PATH)} --require sk/spec/config $(1) || exit $${?}
+local.ruby-exec = ruby -I$(core.GLOBAL_CONFIG_DIR) -r ruby-test-helper $(1) || exit $${?}
+local.rspec-exec = rspec -I$(core.GLOBAL_CONFIG_DIR) -r ruby-spec-helper $(1) || exit $${?}
 
 all::
 	@ echo "Available targets: test(s) local-test(s) spec(s) local-spec(s)"
