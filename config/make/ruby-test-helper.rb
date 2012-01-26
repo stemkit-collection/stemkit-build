@@ -9,9 +9,16 @@
   Author: Gennady Bystritsky
 =end
 
-require 'rubygems'
+ENV.values_at('ruby.ITEM', 'ruby.LOADED_FROM', 'ruby.EXCLUDED').tap do |_item, _loadedfrom, _excluded|
+  if _item
+    exit 0 if _excluded && File.fnmatch?(_excluded, _item)
 
-ENV.values_at('ruby.USE_PATH', 'ruby.EXTRA_LOAD_PATH', 'ruby.LOADED_FROM').tap { |_usepath, _extrapath, _loadedfrom|
+    puts "= #{_item}"
+    $" << File.join(_loadedfrom, _item) if _loadedfrom
+  end
+end
+
+ENV.values_at('ruby.USE_PATH', 'ruby.EXTRA_LOAD_PATH').tap do |_usepath, _extrapath|
   def update_loadpath(items)
     $:.concat items.map { |_item|
       _item.to_s.strip.tap { |_item|
@@ -22,4 +29,7 @@ ENV.values_at('ruby.USE_PATH', 'ruby.EXTRA_LOAD_PATH', 'ruby.LOADED_FROM').tap {
 
   update_loadpath ENV['PATH'].split(File::PATH_SEPARATOR) if _usepath == 'true'
   update_loadpath _extrapath.split if _extrapath
-}
+end
+
+require 'rubygems'
+

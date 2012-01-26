@@ -16,8 +16,12 @@ define ruby.add-path-to-loadpath
   ${eval ${call util.set-env-variable,ruby.USE_PATH,true}}
 endef
 
-define ruby.tweak-loaded-from
+define ruby.tweak-loaded
   ${eval ${call util.set-env-variable,ruby.LOADED_FROM,$(1)}}
+endef
+
+define ruby.exclude-items
+  ${eval ${call util.set-env-variable,ruby.EXCLUDED,$(1)}}
 endef
 
 ${call core.show-current-location}
@@ -25,8 +29,8 @@ ${foreach item,$(SK_MAKE_MAKEFILES_TO_TOP),${call core.load,$(item)}}
 
 ITEMS ?= *
 
-local.ruby-exec = ruby -I$(core.GLOBAL_CONFIG_DIR) -r ruby-test-helper $(1) || exit $${?}
-local.rspec-exec = rspec -I$(core.GLOBAL_CONFIG_DIR) -r ruby-spec-helper $(1) || exit $${?}
+local.ruby-exec = env ruby.ITEM=$(1) ruby -I$(core.GLOBAL_CONFIG_DIR) -r ruby-test-helper $(1) || exit $${?}
+local.rspec-exec = env ruby.ITEM=$(1) rspec -I$(core.GLOBAL_CONFIG_DIR) -r ruby-spec-helper $(2) $(1) || exit $${?}
 
 all::
 	@ echo "Available targets: test(s) local-test(s) spec(s) local-spec(s)"
@@ -46,4 +50,4 @@ local-test::
 	@ for item in *; do case $${item} in ${call util.join,${addsuffix [-_]test,$(ITEMS)} $(ITEMS),.rb |} '') case $${item} in *[-_]spec.rb) ${call local.rspec-exec,$${item}};; *) ${call local.ruby-exec,$${item}};; esac;; esac; done
 
 local-spec::
-	@ for item in *; do case $${item} in ${call util.join,$(ITEMS),[-_]spec.rb |} '') ${call local.rspec-exec,--color -fs $${item}};; esac; done
+	@ for item in *; do case $${item} in ${call util.join,$(ITEMS),[-_]spec.rb |} '') ${call local.rspec-exec,$${item},--color -fs};; esac; done
