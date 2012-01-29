@@ -10,6 +10,10 @@ define core.info
   ${if ${call core.trace-on,$(1)},${info ### [$(1)] $(2) $(3)}}
 endef
 
+define core.ensure-defined
+  ${foreach item,$(1),${if $($(item)),,${error $(item) not defined}}}
+endef
+
 define core.trace-current-location
   ${call core.trace,core,Got here,$(core.LAST_LOADED_FILE)}
 endef
@@ -46,11 +50,7 @@ define core.load-from-current
 endef
 
 define core.load-config
-  ${call core.load,${dir $(core.GLOBAL_CONFIG_DIR)}${strip $(1)}}
-endef
-
-define core.load-plugin
-  ${call core.load-config,plugins/${strip $(1)}.mk}
+  ${call core.load$(2),${dir $(core.GLOBAL_CONFIG_DIR)}${strip $(1)}}
 endef
 
 MAKE := $(SK_MAKE_SELF_PATH)
@@ -64,10 +64,22 @@ ${call core.load-config,Make.util}
 
 ifdef SK_MAKE_PROJECT_MAKEFILE
   define core.load-project-config
-	${call core.load,$(core.PROJECT_CONFIG_DIR)${strip $(1)}}
+	${call core.load$(2),$(core.PROJECT_CONFIG_DIR)${strip $(1)}}
   endef
 
   core.PROJECT_CONFIG_DIR := ${dir $(SK_MAKE_PROJECT_MAKEFILE)}
+endif
+
+define core.private.load-plugin
+  ${call core.load-config,plugins/${strip $(1)}.mk,-if-present}
+  ${call core.load-project-config,plugins/${strip $(1)}.mk,-if-present}
+endef
+
+define core.load-plugin
+  ${eval ${call core.private.load-plugin,$(1)}}
+endef
+
+ifdef SK_MAKE_PROJECT_MAKEFILE
   ${call core.load,$(SK_MAKE_PROJECT_MAKEFILE)}
 else
   ${call core.load-local-makefile-if-present}
