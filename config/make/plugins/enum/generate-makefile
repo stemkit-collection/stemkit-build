@@ -18,8 +18,9 @@ class Application < TSC::Application
     super { |_config|
       _config.options = [
         [ '--output', 'Output destination', 'file', '-o' ],
-        [ '--action', 'Action to run', 'action', '-a' ],
-        [ '--target', 'Make target', 'target', '-t' ]
+        [ '--command', 'Command to run', 'command', '-c' ],
+        [ '--target', 'Make target', 'target', '-t' ],
+        [ '--action', 'Sequence', 'sequence', '-a' ]
       ]
       _config.arguments = '<makefile-path> <items> ...'
       _config.description = 'Workflow makefile generator'
@@ -44,44 +45,84 @@ class Application < TSC::Application
   def produce(io)
     output io, %{
       | # vim: ft=make: sw=2:
-      |
-      | info::
-      | \t@ echo Available targets: #{target} #{basename_items.join(' ')}
-      |
-      | .PHONY: #{target} #{basename_items.join(' ')}
-      | #{target}:: #{basename_items.join(' ')}
     }
+    if actions.empty?
+      produce_for_target_items(io, target, target_items)
+    else
+      actions.each do |_action|
+        produce_for_target_items(io, action_target(_action), action_items(_action), _action)
+      end
 
-    items.each do |_item|
-      strip_extension(_item).tap do |_basename|
-        output io, %{
-          | #{_basename}:
-          | \t${call #{action},#{_item}}
-        }
+      output io, %{
+        | .PHONY: #{target} #{target_items.join(' ')}
+        | #{target}:: #{target_items.join(' ')}
+      }
+
+      [ target_items, action_items(actions.first) ].transpose.each do |_item, _action_item|
+        output io, "#{_item}: #{_action_item}"
       end
     end
   end
 
-  def action
-    @action ||= options.action or raise 'No action'
+  def produce_for_target_items(io, target, target_items, action = nil)
+    output io, %{
+      | info::
+      | \t@ echo Available targets: #{target} #{target_items.join(' ')}
+      |
+      | .PHONY: #{target} #{target_items.join(' ')}
+      | #{target}:: #{target_items.join(' ')}
+    }
+
+    [ target_items, items ].transpose.each do |_target, _item|
+      output io, %{
+        | #{_target}:
+        | \t${call #{ normalize_array(command, _item, action).join(',') }}
+      }
+    end
+  end
+
+  def command
+    @command ||= options.command or raise 'No command'
   end
 
   def target
     @target ||= options.target or raise 'No target'
   end
 
+  def action_target(action)
+    (@action_target ||= {})[action] ||= make_action_item(action, target)
+  end
+
   def items
     @items ||= ARGV
   end
 
-  def basename_items
-    @basename_items ||= items.map { |_item|
-      strip_extension(_item)
+  def action_items(action)
+    (@action_items ||= {})[action] ||= target_items.map { |_item|
+      make_action_item(action, _item)
     }
   end
 
-  def strip_extension(item)
-    item.sub %r{[.][^.]*?$}, ''
+  def make_action_item(action, item)
+    [ action, item ].join('-')
+  end
+
+  def target_items
+    @target_items ||= items.map { |_item|
+      _item.sub %r{[.][^.]*?$}, ''
+    }
+  end
+
+  def actions
+    @actions ||= normalize_array options.action.to_s.split(':').map { |_action|
+      _action.strip.tap { |_action|
+        break nil if _action.empty?
+      }
+    }
+  end
+
+  def normalize_array(*args)
+    args.flatten.compact
   end
 
   def output(io, *args)
