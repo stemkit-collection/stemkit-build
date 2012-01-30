@@ -74,6 +74,7 @@ class Application < SK::ScopingLauncher
   def project_scope_settings
     { :project_makefile => project_makefile,
       :project_top => local_scope_top,
+      :project_root => root,
       :path_from_top => path_from_local_scope_top,
       :path_to_top => path_to_local_scope_top
     }

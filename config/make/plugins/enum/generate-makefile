@@ -1,0 +1,94 @@
+#!/usr/bin/env ruby
+=begin
+  vim: ft=ruby: sw=2:
+  Copyright (c) 2012, Gennady Bystritsky <bystr@mac.com>
+
+  Distributed under the MIT Licence.
+  This is free software. See 'LICENSE' for details.
+  You must read and accept the license prior to use.
+
+  Author: Gennady Bystritsky
+=end
+
+$:.concat ENV['PATH'].to_s.split(File::PATH_SEPARATOR)
+require 'tsc/application.rb'
+
+class Application < TSC::Application
+  def initialize
+    super { |_config|
+      _config.options = [
+        [ '--output', 'Output destination', 'file', '-o' ],
+        [ '--action', 'Action to run', 'action', '-a' ],
+        [ '--target', 'Make target', 'target', '-t' ]
+      ]
+      _config.arguments = '<makefile-path> <items> ...'
+      _config.description = 'Workflow makefile generator'
+    }
+  end
+
+  def start
+    handle_errors {
+      process_command_line
+      require 'rubygems'
+
+      if options.output?
+        File.open(options.output, 'w+') { |_io|
+          produce _io
+        }
+      else
+        produce $stdout
+      end
+    }
+  end
+
+  def produce(io)
+    output io, %{
+      | # vim: ft=make: sw=2:
+      |
+      | info::
+      | \t@ echo Available targets: #{target} #{basename_items.join(' ')}
+      |
+      | .PHONY: #{target} #{basename_items.join(' ')}
+      | #{target}:: #{basename_items.join(' ')}
+    }
+
+    items.each do |_item|
+      strip_extension(_item).tap do |_basename|
+        output io, %{
+          | #{_basename}:
+          | \t${call #{action},#{_item}}
+        }
+      end
+    end
+  end
+
+  def action
+    @action ||= options.action or raise 'No action'
+  end
+
+  def target
+    @target ||= options.target or raise 'No target'
+  end
+
+  def items
+    @items ||= ARGV
+  end
+
+  def basename_items
+    @basename_items ||= items.map { |_item|
+      strip_extension(_item)
+    }
+  end
+
+  def strip_extension(item)
+    item.sub %r{[.][^.]*?$}, ''
+  end
+
+  def output(io, *args)
+    io.puts *args.flatten.compact.map { |_item|
+      _item.gsub %r{^(\s*[|] ?)}, ''
+    }
+  end
+end
+
+Application.new.start
