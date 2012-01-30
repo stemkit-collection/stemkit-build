@@ -7,11 +7,6 @@ enum.LOCATION := ${basename $(core.LAST_LOADED_FILE)}
 enum.BINDIR := $(SK_MAKE_PATH_TO_TOP)/../bin/$(SK_MAKE_PATH_FROM_TOP)
 enum.GENERATOR := $(enum.LOCATION)/generate-makefile
 
-.PHONY: all info clean
-
-info::
-	@ echo Available targets: info all clean
-
 $(enum.BINDIR):
 	mkdir -p $@
 
