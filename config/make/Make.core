@@ -26,6 +26,10 @@ define core.load-local-makefile-if-present
   ${eval ${if $(SK_MAKE_LOCAL_MAKEFILE),${call core.load,$(SK_MAKE_LOCAL_MAKEFILE)},${call core.load-if-present,makefile}}}
 endef
 
+define core.load-all-makefiles-to-top
+  ${foreach item,$(SK_MAKE_MAKEFILES_TO_TOP),${call core.load,$(item)}}
+endef
+
 define core.load-with
   ${eval core.LAST_LOADED_FILE := $(1)}
   ${eval core.LOADED_FILES += $(1)}

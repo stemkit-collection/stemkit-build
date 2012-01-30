@@ -24,9 +24,6 @@ define ruby.exclude-items
   ${eval ${call util.set-env-variable,ruby.EXCLUDED,$(1)}}
 endef
 
-${call core.show-current-location}
-${foreach item,$(SK_MAKE_MAKEFILES_TO_TOP),${call core.load,$(item)}}
-
 ITEMS ?= *
 
 local.ruby-exec = env ruby.ITEM=$(1) ruby -I$(core.GLOBAL_CONFIG_DIR) -r ruby-test-helper $(1) || exit $${?}
