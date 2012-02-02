@@ -45,7 +45,7 @@ local-test local-spec::
 	@ echo Folder: $(CURDIR)
 
 local-test::
-	@ for item in *; do case $${item} in ($(ITEMS:%=%[-_]spec.rb|)'') ${call local.rspec-exec,$${item}};; ($(ITEMS:%=%[-_]test.rb|)$(ITEMS:%=%.rb|)'') ${call local.ruby-exec,$${item}};; esac; done
+	@ for item in *; do case $${item} in ($(ITEMS:%=%[-_]spec.rb|)$(ITEMS:%=%[-_]test.rb|)$(ITEMS:%=%.rb|)'') case $${item} in (*[-_]spec.rb) ${call local.rspec-exec,$${item}};; (*) ${call local.ruby-exec,$${item}};; esac;; esac; done
 
 local-spec::
 	@ for item in *; do case $${item} in ($(ITEMS:%=%[-_]spec.rb|)'') ${call local.rspec-exec,$${item},--color -fs};; esac; done
