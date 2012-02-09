@@ -94,7 +94,21 @@ class Application < TSC::Application
   end
 
   def items
-    @items ||= ARGV
+    @items ||= begin
+      make_items(ARGV).inject [] do |_result, _item|
+        if _item =~ %r{^[!](.*)$}
+          _result - Dir.glob($1)
+        else
+          _result + Dir.glob(_item)
+        end
+      end
+    end
+  end
+
+  def make_items(array)
+    normalize_array array.map { |_item|
+      _item.split
+    }
   end
 
   def action_items(action)

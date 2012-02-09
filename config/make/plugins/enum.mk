@@ -13,7 +13,7 @@ $(enum.BINDIR):
 define enum.generate-makefile
   $(enum.BINDIR)/$(1): . $(enum.BINDIR) $(enum.GENERATOR) $(core.LAST_LOADED_FILE)
 	@ echo "### Rebuilding $(enum.BINDIR)/$(1)"
-	@ $(enum.GENERATOR) -o "$(enum.BINDIR)/$(1)" -t "$(2)" -c "$(3)" -a "$(5)" $(4)
+	@ $(enum.GENERATOR) -o "$(enum.BINDIR)/$(1)" -t "$(2)" -c "$(3)" -a "$(5)" "$(4)"
 
   ${call core.load-if-present,$(enum.BINDIR)/$(1)}
 endef
