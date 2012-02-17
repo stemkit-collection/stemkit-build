@@ -118,7 +118,7 @@ class Application < TSC::Application
   end
 
   def make_action_item(action, item)
-    [ action, item ].join('-')
+    [ item, action ].join('-')
   end
 
   def target_items
