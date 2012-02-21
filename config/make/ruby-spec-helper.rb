@@ -12,6 +12,16 @@
 require 'ruby-test-helper.rb'
 require 'rspec'
 
+require 'rspec/expectations'
+
+RSpec::Matchers.define :include_instance_of do |expected|
+  match do |actual|
+    actual.any? { |_item|
+      _item.instance_of? expected
+    }
+  end
+end
+
 RSpec.configure do |config|
   # == Mock Framework
   #
