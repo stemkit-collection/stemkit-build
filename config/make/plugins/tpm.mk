@@ -18,7 +18,7 @@ define tpm.private.make-package
   clean:: clean-packages
 
   build-package:: $(SK_MAKE_PKGTOP) $(core.LAST_LOADED_FILE)
-	distributor -v -o $(SK_MAKE_PKGTOP) $(1)
+	$(2) distributor -v -o $(SK_MAKE_PKGTOP) $(1)
 
   clean-packages::
 	rm -f $(SK_MAKE_PKGTOP)/*.tpm
@@ -29,6 +29,6 @@ define tpm.private.make-package
 endef
 
 define tpm.make-package
-  ${call core.eval-if-local,tpm.private.make-package,$(1)}
+  ${call core.eval-if-local,tpm.private.make-package,$(1),$(2)}
 endef
 
