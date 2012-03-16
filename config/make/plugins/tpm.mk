@@ -18,7 +18,7 @@ define tpm.private.make-package
   clean:: clean-packages
 
   build-package:: $(SK_MAKE_PKGTOP) $(core.LAST_LOADED_FILE)
-	$(2) distributor -v -o $(SK_MAKE_PKGTOP) $(1)
+	$(ruby.ENV) $(2) distributor -v -o $(SK_MAKE_PKGTOP) $(1)
 
   clean-packages::
 	rm -f $(SK_MAKE_PKGTOP)/*.tpm
