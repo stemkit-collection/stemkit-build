@@ -9,7 +9,7 @@
   Author: Gennady Bystritsky
 =end
 
-require 'ruby-test-helper.rb'
+require 'ruby/test-helper.rb'
 require 'rspec'
 
 require 'rspec/expectations'

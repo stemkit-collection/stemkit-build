@@ -13,19 +13,18 @@ define tpm.private.make-package
   info::
 	@echo Available targets: $(PN_TPM_TARGETS)
 
-  package:: build-package show-packages
+  package:: build-package
 
   clean:: clean-packages
 
   build-package:: $(SK_MAKE_PKGTOP) $(core.LAST_LOADED_FILE)
-	$(ruby.ENV) $(2) distributor -v -o $(SK_MAKE_PKGTOP) $(1)
+	$(ruby.ENV) distributor --dump-path -v -o $(SK_MAKE_PKGTOP) $(1) $(2)
 
   clean-packages::
 	rm -f $(SK_MAKE_PKGTOP)/*.tpm
 
   show-packages:: $(SK_MAKE_PKGTOP)
-	@echo PACKAGES:
-	@ for f in $(SK_MAKE_PKGTOP)/*; do echo $$$${f}; done | sed -n 's/^.*[.]tpm$$$$/  &/p'
+	@for f in $(SK_MAKE_PKGTOP)/*.tpm; do echo $$$${f}; done
 endef
 
 define tpm.make-package
