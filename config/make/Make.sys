@@ -29,7 +29,7 @@ sys.p.vcf = ${firstword $(SK_ENV_$(1)_$(2)) $(SK_PRJ_$(1)_$(2)) $(SK_ENV_ARTIFAC
 # $(4) - Top
 define sys.p.setup-artifacts-for
   ${eval sys.$(1)TOP := ${call sys.p.vcf,$(1),TOP,$(4) $(SK_MAKE_PATH_TO_TOP)/..}/${call sys.p.vcf,$(1),OFFSET,$(3) .}/$(2)}
-  ${eval sys.$(1)DIR := $(sys.$(1)TOP)/$(SK_MAKE_PATH_FROM_TOP)}
+  sys.$(1)DIR := ${if ${filter .,$(SK_MAKE_PATH_FROM_TOP)},$(sys.$(1)TOP),$(sys.$(1)TOP)/$(SK_MAKE_PATH_FROM_TOP)}
 endef
 
 define sys.p.setup-artifacts-bin
