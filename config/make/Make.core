@@ -71,8 +71,8 @@ core.PLUGINS_DIR := $(core.GLOBAL_CONFIG_DIR)plugins
 ${call core.info,core,[$(MAKECMDGOALS)] In ${shell pwd}}
 ${call core.show-current-location}
 
-${call core.load-config,Make.sys}
 ${call core.load-config,Make.util}
+${call core.load-config,Make.sys}
 
 ifdef SK_MAKE_PROJECT_MAKEFILE
   define core.load-project-config
@@ -96,3 +96,10 @@ ifdef SK_MAKE_PROJECT_MAKEFILE
 else
   ${call core.load-local-makefile-if-present}
 endif
+
+.PHONY: all
+all::
+
+$(sys.BINDIR) $(sys.GENDIR) $(sys.PKGTOP) :
+	mkdir -p $@
+
