@@ -1,0 +1,69 @@
+# vim: ft=make: sw=2:
+${core.show-current-location}
+
+# Environment, [.buildrc] [config/build.yaml]
+# ======================= ===================
+# SK_ENV_ARTIFACTS_OFFSET (SK_PRJ_ARTIFACTS_OFFSET)
+# SK_ENV_ARTIFACTS_TOP    (SK_PRJ_ARTIFACTS_TOP)
+#
+# SK_ENV_BIN_OFFSET       (SK_PRJ_BIN_OFFSET)
+# SK_ENV_BIN_TOP          (SK_PRJ_BIN_TOP)
+#
+# SK_ENV_GEN_OFFSET       (SK_PRJ_GEN_OFFSET)
+# SK_ENV_GEN_TOP          (SK_PRJ_GEN_TOP)
+#
+# SK_ENV_PKG_OFFSET       (SK_PRJ_PKG_OFFSET)
+# SK_ENV_PKG_TOP          (SK_PRJ_PKG_TOP)
+
+# variable-choice-first:
+#   Makes a preferential list of variables and picks the first entry.
+
+sys.SRCTOP := $(SK_MAKE_PATH_TO_TOP)
+sys.SRCDIR := .
+
+sys.p.vcf = ${firstword $(SK_ENV_$(1)_$(2)) $(SK_PRJ_$(1)_$(2)) $(SK_ENV_ARTIFACTS_$(2)) $(SK_PRJ_ARTIFACTS_$(2)) $(3)}
+
+# $(1) - Varialble name variator
+# $(2) - Leaf path component name
+# $(3) - Offset
+# $(4) - Top
+define sys.p.setup-artifacts-for
+  sys.$(1)TOP := ${call sys.p.vcf,$(1),TOP,$(4) $(SK_MAKE_PATH_TO_TOP)/..}/${call sys.p.vcf,$(1),OFFSET,$(3) .}/$(2)
+  sys.$(1)DIR := $(sys.$(1)TOP)/$(SK_MAKE_PATH_FROM_TOP)
+endef
+
+define sys.p.setup-artifacts-bin
+  ${call sys.p.setup-artifacts-for,BIN,bin,$(1),$(2)}
+endef
+sys.setup-artifacts-bin = ${eval ${call sys.p.setup-artifacts-bin,$(1),$(2)}}
+
+define sys.p.setup-artifacts-gen
+  ${call sys.p.setup-artifacts-for,GEN,gen,$(1),$(2)}
+endef
+sys.setup-artifacts-gen = ${eval ${call sys.p.setup-artifacts-gen,$(1),$(2)}}
+
+define sys.p.setup-artifacts-pkg
+  ${call sys.p.setup-artifacts-for,PKG,pkg,$(1),$(2)}
+endef
+sys.setup-artifacts-pkg = ${eval ${call sys.p.setup-artifacts-pkg,$(1),$(2)}}
+
+define sys.p.setup-artifacts
+  ${call sys.p.setup-artifacts-bin,$(1),$(2)}
+  ${call sys.p.setup-artifacts-gen,$(1),$(2)}
+  ${call sys.p.setup-artifacts-pkg,$(1),$(2)}
+endef
+sys.setup-artifacts = ${eval ${call sys.p.setup-artifacts,$(1),$(2)}}
+
+${call sys.setup-artifacts}
+
+${info SRCTOP - $(sys.SRCTOP)}
+${info SRCDIR - $(sys.SRCDIR)}
+
+${info BINTOP - $(sys.BINTOP)}
+${info BINDIR - $(sys.BINDIR)}
+
+${info GENTOP - $(sys.GENTOP)}
+${info GENDIR - $(sys.GENDIR)}
+
+${info PKGTOP - $(sys.PKGTOP)}
+${info PKGDIR - $(sys.PKGDIR)}
