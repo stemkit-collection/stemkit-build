@@ -21,7 +21,7 @@ ${core.show-current-location}
 sys.SRCTOP := $(SK_MAKE_PATH_TO_TOP)
 sys.SRCDIR := .
 
-sys.p.vcf = ${firstword $(SK_ENV_$(1)_$(2)) $(SK_PRJ_$(1)_$(2)) $(SK_ENV_ARTIFACTS_$(2)) $(SK_PRJ_ARTIFACTS_$(2)) $(3)}
+sys.p.vcf = ${firstword $(SK_ENV_ARTIFACTS_$(1)_$(2)) $(SK_PRJ_ARTIFACTS_$(1)_$(2)) $(SK_ENV_ARTIFACTS_$(2)) $(SK_PRJ_ARTIFACTS_$(2)) $(3)}
 
 # $(1) - Varialble name variator
 # $(2) - Leaf path component name
@@ -34,7 +34,7 @@ sys.p.vcf = ${firstword $(SK_ENV_$(1)_$(2)) $(SK_PRJ_$(1)_$(2)) $(SK_ENV_ARTIFAC
 # used anyways. Keeping it for now as it feels a bit cleaner.
 #
 define sys.p.setup-artifacts-for
-  ${eval sys.$(1)TOP := ${call sys.p.vcf,$(1),TOP,$(4) $(SK_MAKE_PATH_TO_TOP)/..}/${call sys.p.vcf,$(1),OFFSET,$(3) .}/$(2)}
+  ${eval sys.$(1)TOP := ${call sys.p.vcf,$(1),TOP,$(4) $(SK_MAKE_PATH_TO_TOP)/..}/${call sys.p.vcf,$(1),OFFSET,$(3) .}/$(2)/${call sys.p.vcf,$(1),SUFFIX,.}}
   sys.$(1)DIR := ${if ${filter .,$(SK_MAKE_PATH_FROM_TOP)},$(sys.$(1)TOP),$(sys.$(1)TOP)/$(SK_MAKE_PATH_FROM_TOP)}
 endef
 
