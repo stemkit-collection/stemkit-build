@@ -56,14 +56,14 @@ sys.setup-artifacts = ${eval ${call sys.p.setup-artifacts,$(1),$(2)}}
 
 ${call sys.setup-artifacts}
 
-${info SRCTOP - $(sys.SRCTOP)}
-${info SRCDIR - $(sys.SRCDIR)}
+${call core.info,sys,SRCTOP - $(sys.SRCTOP)}
+${call core.info,sys,SRCDIR - $(sys.SRCDIR)}
 
-${info BINTOP - $(sys.BINTOP)}
-${info BINDIR - $(sys.BINDIR)}
+${call core.info,sys,BINTOP - $(sys.BINTOP)}
+${call core.info,sys,BINDIR - $(sys.BINDIR)}
 
-${info GENTOP - $(sys.GENTOP)}
-${info GENDIR - $(sys.GENDIR)}
+${call core.info,sys,GENTOP - $(sys.GENTOP)}
+${call core.info,sys,GENDIR - $(sys.GENDIR)}
 
-${info PKGTOP - $(sys.PKGTOP)}
-${info PKGDIR - $(sys.PKGDIR)}
+${call core.info,sys,PKGTOP - $(sys.PKGTOP)}
+${call core.info,sys,PKGDIR - $(sys.PKGDIR)}
