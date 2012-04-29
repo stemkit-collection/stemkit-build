@@ -27,15 +27,9 @@ sys.p.vcf = ${firstword $(SK_ENV_ARTIFACTS_$(1)_$(2)) $(SK_PRJ_ARTIFACTS_$(1)_$(
 # $(2) - Leaf path component name
 # $(3) - Offset
 # $(4) - Top
-
-# the conditional to guard for trailing '.' in $(sys.$(1)DIR) is probably not
-# worth it (added for mkdir failures), as even with '.' as a last component,
-# it is possible to use 'mkdir -p' to do the job, which most likely will be
-# used anyways. Keeping it for now as it feels a bit cleaner.
-#
 define sys.p.setup-artifacts-for
   ${eval sys.$(1)TOP := ${call sys.p.vcf,$(1),TOP,$(4) $(SK_MAKE_PATH_TO_TOP)/..}/${call sys.p.vcf,$(1),OFFSET,$(3) .}/$(2)/${call sys.p.vcf,$(1),SUFFIX,.}}
-  sys.$(1)DIR := ${if ${filter .,$(SK_MAKE_PATH_FROM_TOP)},$(sys.$(1)TOP),$(sys.$(1)TOP)/$(SK_MAKE_PATH_FROM_TOP)}
+  ${eval sys.$(1)DIR := $(sys.$(1)TOP)/$(SK_MAKE_PATH_FROM_TOP)}
 endef
 
 define sys.p.setup-artifacts-bin
