@@ -47,7 +47,7 @@ class Application < SK::ScopingLauncher
       update_environment project_scope_settings
 
       config('build.yaml', :spot => local_scope_top.join('config')).tap { |_config|
-        update_environment _config.properties, :prefix => :product, :upcase => true
+        update_environment _config.properties, :prefix => :sk_prj, :upcase => true
       }
     else
       self.transparent = true
