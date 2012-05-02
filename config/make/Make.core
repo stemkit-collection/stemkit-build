@@ -57,8 +57,12 @@ define core.load-config
   ${call core.load$(2),${dir $(core.GLOBAL_CONFIG_DIR)}${strip $(1)}}
 endef
 
+define if-local
+  ${if ${filter ./,${dir $(core.LAST_LOADED_FILE)}},${call $(1),$(2),$(3),$(4),$(5),$(6),$(7),$(8),$(9)},}
+endef
+
 define core.eval-if-local
-  ${if ${filter ./,${dir $(core.LAST_LOADED_FILE)}},${eval ${call $(1),$(2),$(3),$(4),$(5),$(6),$(7),$(8),$(9)}},}
+  ${eval ${call if-local,$(1),$(2),$(3),$(4),$(5),$(6),$(7),$(8),$(9)}}
 endef
 
 MAKE := $(SK_MAKE_SELF_PATH)

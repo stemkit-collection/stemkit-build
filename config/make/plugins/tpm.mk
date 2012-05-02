@@ -25,6 +25,6 @@ define tpm.private.make-package
 endef
 
 define tpm.make-package
-  ${call core.eval-if-local,tpm.private.make-package,$(1),$(2)}
+  ${eval ${call if-local,tpm.private.make-package,$(1),$(2)}}
 endef
 
