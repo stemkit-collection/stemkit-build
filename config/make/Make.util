@@ -16,3 +16,9 @@ define util.set-env-variable
   override $(1) = $(2)
   export $(1)
 endef
+
+define util.add-env-variable
+  ${call core.info,ruby,Adding $(2) to environmen variable $(1)}
+  override $(1) += $(2)
+  export $(1)
+endef
