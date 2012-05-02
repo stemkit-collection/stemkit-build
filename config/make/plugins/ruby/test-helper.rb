@@ -44,4 +44,7 @@ ENV.values_at('ruby.USE_PATH', 'ruby.EXTRA_LOAD_PATH').tap do |_usepath, _extrap
 end
 
 require 'rubygems'
-
+begin
+  require 'ruby/project-test-helper.rb'
+rescue LoadError
+end
