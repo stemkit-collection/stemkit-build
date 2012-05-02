@@ -9,13 +9,25 @@
   Author: Gennady Bystritsky
 =end
 
-ENV.values_at('ruby.ITEM', 'ruby.LOADED_FROM', 'ruby.EXCLUDED').tap do |_item, _loadedfrom, _excluded|
-  if _item
-    exit 0 if _excluded && File.fnmatch?(_excluded, _item)
+ENV.values_at('ruby.ITEM', 'ruby.LOADED_FROM').tap do |_item, _loadedfrom|
+  break unless _item
 
-    puts "= #{_item}"
-    $" << File.join(_loadedfrom, _item) if _loadedfrom
+  ENV['ruby.test.INCLUDED'].to_s.split.tap do |_included|
+    if _included.empty?
+      ENV['ruby.test.EXCLUDED'].to_s.split.tap do |_excluded|
+        exit 0 if _excluded.any? { |_pattern|
+          File.fnmatch? _pattern, _item
+        }
+      end
+    else
+      exit 0 unless _included.any? { |_pattern|
+        File.fnmatch? _pattern, _item
+      }
+    end
   end
+
+  puts "= #{_item}"
+  $" << File.join(_loadedfrom, _item) if _loadedfrom
 end
 
 ENV.values_at('ruby.USE_PATH', 'ruby.EXTRA_LOAD_PATH').tap do |_usepath, _extrapath|

@@ -20,15 +20,23 @@ define ruby.tweak-loaded
   ${eval ${call util.set-env-variable,ruby.LOADED_FROM,$(1)}}
 endef
 
-define ruby.exclude-items
-  ${eval ${call util.set-env-variable,ruby.EXCLUDED,$(1)}}
+define ruby.test.exclude
+  ${eval ${if $(DOALL),,${call if-local,util.add-env-variable,ruby.test.EXCLUDED,$(1)}}}
+endef
+
+define ruby.test.include-only
+  ${eval ${if $(DOALL),,${call if-local,util.add-env-variable,ruby.test.INCLUDED,$(1)}}}
 endef
 
 define ruby.use-version
   ${eval ruby.ENV := ruby-env $(1)}
 endef
 
-ITEMS ?= *
+override ruby.test.EXCLUDED =
+override ruby.test.INCLUDED =
+
+DOALL =
+ITEMS = *
 
 local.ruby-exec = env ruby.ITEM=$(1) $(ruby.ENV) ruby -I$(core.PLUGINS_DIR) -r ruby/test-helper $(1) || exit $${?}
 local.rspec-exec = env ruby.ITEM=$(1) $(ruby.ENV) rspec -I$(core.PLUGINS_DIR) -r ruby/spec-helper $(2) $(1) || exit $${?}
