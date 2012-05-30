@@ -30,20 +30,8 @@ ENV.values_at('ruby.ITEM', 'ruby.LOADED_FROM').tap do |_item, _loadedfrom|
   $" << File.join(_loadedfrom, _item) if _loadedfrom
 end
 
-ENV.values_at('ruby.USE_PATH', 'ruby.EXTRA_LOAD_PATH').tap do |_usepath, _extrapath|
-  def update_loadpath(items)
-    $:.concat items.map { |_item|
-      _item.to_s.strip.tap { |_item|
-        break nil if _item.empty?
-      }
-    }.compact
-  end
+require 'ruby/exec-helper.rb'
 
-  update_loadpath ENV['PATH'].split(File::PATH_SEPARATOR) if _usepath == 'true'
-  update_loadpath _extrapath.split if _extrapath
-end
-
-require 'rubygems'
 begin
   require 'ruby/project-test-helper.rb'
 rescue LoadError
