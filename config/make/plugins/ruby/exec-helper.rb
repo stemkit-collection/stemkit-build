@@ -20,6 +20,6 @@ ENV.values_at('ruby.USE_PATH', 'ruby.EXTRA_LOAD_PATH').tap do |_usepath, _extrap
     }.compact
   end
 
-  update_loadpath ENV['PATH'].split(File::PATH_SEPARATOR) if _usepath == 'true'
+  update_loadpath ENV.to_hash['PATH'].split(File::PATH_SEPARATOR) if _usepath == 'true'
   update_loadpath _extrapath.split if _extrapath
 end

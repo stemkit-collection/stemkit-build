@@ -5,7 +5,7 @@
 # This is free software. See 'LICENSE' for details.
 # You must read and accept the license prior to use.
 
-$:.concat ENV['PATH'].to_s.split(File::PATH_SEPARATOR)
+$:.concat ENV.to_hash['PATH'].to_s.split(File::PATH_SEPARATOR)
 require 'tsc/application.rb'
 
 # This is a front-end for GNU make 3.80. Earlier versions will not work as the
@@ -61,7 +61,7 @@ class Application < TSC::Application
   end
 
   def find_in_path(command)
-    ENV['PATH'].split(File::PATH_SEPARATOR).map { |_location|
+    ENV.to_hash['PATH'].split(File::PATH_SEPARATOR).map { |_location|
       Dir[ File.join(_location, command) ].first
     }.compact
   end
