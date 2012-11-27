@@ -1,6 +1,7 @@
 # vim: ft=make: sw=2:
 
 ${call core.show-current-location}
+${call core.load-from-current,ruby/docs.mk}
 
 define ruby.add-item-to-loadpath
   ${call core.info,ruby,Adding to LOADPATH - $(1)}

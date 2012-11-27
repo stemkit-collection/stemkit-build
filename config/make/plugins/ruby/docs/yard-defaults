@@ -1,0 +1,2 @@
+--exclude '[-_](test|spec)[.]rb$'
+--query 'object.type != :class || object.tag(:api) || object.superclass.to_s != "Test::Unit::TestCase"'
