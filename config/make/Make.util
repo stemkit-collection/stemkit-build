@@ -7,8 +7,13 @@ define util.join
 endef
 
 define util.set-variable
-  ${call core.info,ruby,Setting variable $(1) to $(2)}
+  ${call core.info,ruby,Setting variable $(1): $(2)}
   override $(1) = $(2)
+endef
+
+define util.add-variable
+  ${call core.info,ruby,Adding to variable $(1): $(2)}
+  override $(1) += $(2)
 endef
 
 define util.set-env-variable
