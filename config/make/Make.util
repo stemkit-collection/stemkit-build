@@ -27,3 +27,7 @@ define util.add-env-variable
   override $(1) += $(2)
   export $(1)
 endef
+
+define util.join-path
+  ${if $(2),${foreach item,$(1),${2:%=$(item)/%}},$(1)}
+endef

@@ -9,11 +9,11 @@ define ruby.docs.include
 endef
 
 define ruby.docs.front-page
-  ${eval ruby.docs.FRONT_PAGE_$(1) := $(2)}
+  ${eval ruby.docs.FRONT_PAGE_$(1) := ${call util.join-path,$(2),$(3)}}
 endef
 
 define ruby.docs.pages
-  ${eval ruby.docs.PAGES_$(1) += ${if $(3),${foreach item,$(2),${3:%=$(item)/%}},$(2)}}
+  ${eval ruby.docs.PAGES_$(1) += ${call util.join-path,$(2),$(3)}}
 endef
 
 define ruby.docs.p.join
@@ -27,14 +27,15 @@ endef
 define ruby.docs.p.make
   ${call ruby.docs.include,$(1),$(2)}
 
-  ${call ruby.docs.p.top,$(1)}::
+  ${call ruby.docs.p.top,$(1)}:
 	mkdir -p $$(@)
 
   docs:: ${call ruby.docs.p.top,$(1)}
-	yard doc -c -o $$(<) -b $$(<)/.yardoc --yardopts $(ruby.docs.YARDOPTS) ${call ruby.docs.p.join,--main,FRONT_PAGE,$(1)} ${call ruby.docs.p.join,,INCLUDE,$(1)} -- ${call ruby.docs.p.join,,PAGES,$(1)}
+	yard doc -c -o $$(<) -b $$(<)/.yardoc --yardopts $(ruby.docs.YARDOPTS) ${call ruby.docs.p.join,--main,FRONT_PAGE,$(1)} ${call ruby.docs.p.join,,INCLUDE,$(1)} - ${call ruby.docs.p.join,,PAGES,$(1)}
 
-  install-docs::
-	@
+  install-docs:: ${call ruby.docs.p.top,$(1)}
+	rm -rf $$(LOCATION)/$${notdir $$(<)}
+	cp -r $$(<) $$(LOCATION)/.
 
   clean-docs::
 	rm -rf ${call ruby.docs.p.top,$(1)}
@@ -48,6 +49,7 @@ info::
 	@echo Available targets: $(ruby.docs.TARGETS)
 
 redocs:: clean-docs docs
+install-docs:: sys-ensure-LOCATION
 
 $(ruby.docs.TARGETS)::
 

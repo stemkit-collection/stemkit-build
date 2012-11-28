@@ -71,3 +71,9 @@ ${call core.info,sys,GENDIR - $(sys.GENDIR)}
 
 ${call core.info,sys,PKGTOP - $(sys.PKGTOP)}
 ${call core.info,sys,PKGDIR - $(sys.PKGDIR)}
+
+sys-ensure-LOCATION::
+	@ ${if $(LOCATION),,${error LOCATION not specified, no place for deliverables}}
+	@ test -d $(LOCATION) || (echo Specified location $(LOCATION) is not a folder; false)
+
+.PHONY: sys-ensure-LOCATION
