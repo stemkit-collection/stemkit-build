@@ -5,7 +5,7 @@ ruby.docs.TARGETS := docs redocs install-docs clean-docs
 .PHONY: $(ruby.docs.TARGETS)
 
 define ruby.docs.include
-  ${eval ruby.docs.INCLUDE_$(1) += $(2)}
+  ${eval ruby.docs.INCLUDE_$(1) += ${call util.join-path,$(2),$(3)}}
 endef
 
 define ruby.docs.front-page
@@ -25,7 +25,7 @@ define ruby.docs.p.top
 endef
 
 define ruby.docs.p.make
-  ${call ruby.docs.include,$(1),$(2)}
+  ${call ruby.docs.include,$(1),$(2),$(3)}
 
   ${call ruby.docs.p.top,$(1)}:
 	mkdir -p $$(@)
