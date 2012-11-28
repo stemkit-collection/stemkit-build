@@ -1,7 +1,7 @@
 # vim: ft=make: sw=2:
 
 ruby.docs.YARDOPTS := ${dir $(core.LAST_LOADED_FILE)}docs/yard-defaults
-ruby.docs.TARGETS := docs redocs install-docs serve-docs clean-docs
+ruby.docs.TARGETS := docs redocs install-docs clean-docs
 .PHONY: $(ruby.docs.TARGETS)
 
 define ruby.docs.include
@@ -52,5 +52,3 @@ redocs:: clean-docs docs
 install-docs:: sys-ensure-LOCATION
 
 $(ruby.docs.TARGETS)::
-
-serve-docs::
