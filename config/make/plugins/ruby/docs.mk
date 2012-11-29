@@ -31,7 +31,7 @@ define ruby.docs.p.make
 	mkdir -p $$(@)
 
   docs:: ${call ruby.docs.p.top,$(1)}
-	$(ruby.ENV) yard doc -c --no-private -o $$(<) -b $$(<)/.yardoc --yardopts $(ruby.docs.YARDOPTS) ${call ruby.docs.p.join,--main,FRONT_PAGE,$(1)} ${call ruby.docs.p.join,,INCLUDE,$(1)} - ${call ruby.docs.p.join,,PAGES,$(1)}
+	$(ruby.ENV) yard doc -o $$(<) -b $$(<)/.yardoc --yardopts $(ruby.docs.YARDOPTS) ${call ruby.docs.p.join,--main,FRONT_PAGE,$(1)} ${call ruby.docs.p.join,,INCLUDE,$(1)} - ${call ruby.docs.p.join,,PAGES,$(1)}
 
   install-docs:: ${call ruby.docs.p.top,$(1)}
 	rm -rf $$(LOCATION)/$${notdir $$(<)}
