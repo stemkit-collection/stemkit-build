@@ -105,7 +105,7 @@ class Application < SK::ScopingLauncher
     }
   end
 
-  def command_line_arguments(args)
+  def inject_top_makefile(args)
     case
       when global_scope?
         [ '-f', global_makefile, args ]
@@ -116,6 +116,27 @@ class Application < SK::ScopingLauncher
       else
         args
     end
+  end
+
+  def filter_suffix_one(args)
+    nil.tap do |_target|
+      begin
+        return args.map { |_item|
+          if _target
+            update_environment :one => _item
+            _target = nil
+          else
+            (_target = _item.scan(%r{^((?=[^-])[^=]+)-one$}).flatten.first) || _item
+          end
+        }
+      ensure
+        raise TSC::Error, [ _target, 'No item for one' ] if _target
+      end
+    end
+  end
+
+  def command_line_arguments(args)
+    inject_top_makefile filter_suffix_one(args)
   end
 
   def global_makefile
