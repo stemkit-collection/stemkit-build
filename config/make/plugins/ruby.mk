@@ -53,8 +53,16 @@ specs:: spec
 local-tests:: local-test
 local-specs:: local-spec
 
+define local.find-makefile-and-do
+  find . -name '[Mm]akefile' -print | while read path; do $(MAKE) -C `dirname $${path}` local-$(1) || exit $${?}; done
+endef
+
+define local.make-one
+  make -C ${dir $(1)} ITEMS=${notdir ${basename $(1)}} local-$(2)
+endef
+
 test spec::
-	@ find . -name '[Mm]akefile' -print | while read path; do $(MAKE) -C `dirname $${path}` local-$(@) || exit $${?}; done
+	@ ${if $(SK_MAKE_ONE),${call local.make-one,$(SK_MAKE_ONE),$(@)},${call local.find-makefile-and-do,$(@)}}
 
 local-test local-spec::
 	@ echo Folder: $(CURDIR)
