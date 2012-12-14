@@ -1,4 +1,5 @@
 --use-cache
 --no-private
+--protected
 --exclude '[-_](test|spec)[.]rb$'
 --query 'object.type != :class || object.tag(:api) || object.superclass.to_s != "Test::Unit::TestCase"'
