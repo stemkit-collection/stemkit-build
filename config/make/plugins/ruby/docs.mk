@@ -2,8 +2,9 @@
 
 ruby.docs.YARDOPTS := $(core.LAST_LOADED_FROM)/docs/yard-defaults
 ruby.docs.TARGETS := docs redocs install-docs clean-docs clean-installed-docs
+ruby.docs.LOCAL_TARGETS := $(ruby.docs.TARGETS:%=local-%)
 
-.PHONY: $(ruby.docs.TARGETS)
+.PHONY: $(ruby.docs.TARGETS) $(ruby.docs.LOCAL_TARGETS)
 
 # Public rules
 #
@@ -36,24 +37,29 @@ define ruby.docs.p.make-targets
   $(2):
 	mkdir -p $$(@)
 
-  docs:: $(2)
+  local-docs:: $(2)
 	$(ruby.ENV) yard doc -o $$(<) -b $$(<)/.yardoc --yardopts $(ruby.docs.YARDOPTS) $$(${call ruby.docs.p.v,FRONT_PAGE,$(1)}:%=--main '%') $$(${call ruby.docs.p.v,INCLUDE,$(1)}:%='%') - $$(${call ruby.docs.p.v,PAGES,$(1)}:%='%')
 
-  install-docs:: $(2)
+  local-install-docs:: $(2)
 	mkdir -p $(3)
 	cp -r $$(<)/. $(3)/.
 
-  clean-docs::
+  local-clean-docs::
 	rm -rf $(2)
 
-  clean-installed-docs::
+  local-clean-installed-docs::
 	rm -rf $(3)
 endef
 
 info::
 	@echo Available targets: $(ruby.docs.TARGETS)
+	@echo Available targets: $(ruby.docs.LOCAL_TARGETS)
 
-redocs:: clean-docs docs
-install-docs clean-installed-docs:: sys-ensure-LOCATION
+local-redocs:: local-clean-docs local-docs
+local-install-docs local-clean-installed-docs:: sys-ensure-LOCATION
 
 $(ruby.docs.TARGETS)::
+	@ $(MAKE) local-$(@)
+	@ find . -depth +1 -name docs -print | while read path; do $(MAKE) -C `dirname $${path}` local-$(@) || exit $${?}; done
+
+$(ruby.docs.LOCAL_TARGETS)::
