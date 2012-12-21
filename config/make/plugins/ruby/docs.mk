@@ -58,8 +58,14 @@ info::
 local-redocs:: local-clean-docs local-docs
 local-install-docs local-clean-installed-docs:: sys-ensure-LOCATION
 
+# In the following actions we want to avoid processing 'docs' in the current
+# folder in find command. This folder is processed by the preceeding make
+# invocation, thus always ensuring that we process docs both downstream and
+# upstream folder structure. And without duplicate processing no matter
+# whether 'docs' is present in the current folder or not.
+#
 $(ruby.docs.TARGETS)::
 	@ $(MAKE) local-$(@)
-	@ find . -depth +1 -name docs -print | while read path; do $(MAKE) -C `dirname $${path}` local-$(@) || exit $${?}; done
+	@ find */* -name docs -print | while read path; do $(MAKE) -C `dirname $${path}` local-$(@) || exit $${?}; done
 
 $(ruby.docs.LOCAL_TARGETS)::
