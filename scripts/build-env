@@ -1,0 +1,73 @@
+#!/usr/bin/env ruby
+=begin
+  vim: sw=2:
+  Copyright (c) 2013, Gennady Bystritsky <bystr@mac.com>
+
+  Distributed under the MIT Licence.
+  This is free software. See 'LICENSE' for details.
+  You must read and accept the license prior to use.
+
+  Author: Gennady Bystritsky (bystrg@emc.com)
+=end
+
+$:.concat ENV.to_hash['PATH'].to_s.split(File::PATH_SEPARATOR)
+require 'sk/scoping-launcher.rb'
+
+class Application < SK::ScopingLauncher
+  attr_reader :original_command
+
+  protected
+  #########
+
+  def setup
+    update_environment source_scope_settings if source_scope?
+
+    config('.buildrc', :uproot => true, :home => true).tap { |_config|
+      self.transparent = _config.attribute(:transparent)
+      update_environment _config.properties(:make, :build), :prefix => false, :upcase => false
+    }
+
+    if local_scope?
+      update_environment project_scope_settings
+
+      config('build.yaml', :spot => local_scope_top.join('config')).tap { |_config|
+        update_environment _config.properties, :prefix => :sk_prj, :upcase => true
+      }
+    else
+      self.transparent = true
+    end
+
+    print_environment_and_exit if ARGV.empty?
+    @original_command = ARGV.shift
+  end
+
+  def print_environment_and_exit
+    self.verbose = true
+    populate_environment
+
+    exit
+  end
+
+  def project_scope_settings
+    { :project_top => local_scope_top,
+      :project_root => root,
+      :path_from_top => path_from_local_scope_top,
+      :path_to_top => path_to_local_scope_top
+    }
+  end
+
+  def source_scope_settings
+    { :srctop => srctop,
+      :bintop => bintop,
+      :gentop => gentop,
+      :pkgtop => pkgtop,
+    }
+  end
+
+  def local_scope_selectors
+    [ 'config/build.yaml'
+    ]
+  end
+end
+
+Application.new.start
