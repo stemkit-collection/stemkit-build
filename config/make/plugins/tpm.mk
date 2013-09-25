@@ -44,7 +44,7 @@ endef
 # the target must be based on <package>, specify both <product> and <package>
 # in $(1), omitting $(4) altogether.
 #
-tpm.make = ${eval ${call if-local,tpm.p.make,${firstword $(1)},${lastword $(1)},$(2),$(3),$(4)}}
+tpm.make = ${eval ${call if-local,tpm.p.make,${firstword $(1)},${lastword $(1)},$(2),$(3),$(4:%=%)}}
 
 # ${call tpm.make-rpm, <product> [<package>], <version>, <build>, [<package>], <top>}
 #                      $(1)                   $(2)       $(3)     $(4)         $(5)
@@ -55,7 +55,7 @@ tpm.make = ${eval ${call if-local,tpm.p.make,${firstword $(1)},${lastword $(1)},
 # <package> is specified in $(1), the RPM product name (-N) will be set to
 # <product>-<package>. Otherwise, to just <package>.
 #
-tpm.make-rpm = ${eval ${call if-local,tpm.p.make-rpm,${firstword $(1)},${lastword $(1)},${word 2,$(1)},$(2),$(3),$(4),$(5)}}
+tpm.make-rpm = ${eval ${call if-local,tpm.p.make-rpm,${firstword $(1)},${lastword $(1)},${word 2,$(1)},$(2),$(3),$(4:%=%),$(5:%=%)}}
 
 info::
 	@echo Available targets: $(tpm.TARGETS)
