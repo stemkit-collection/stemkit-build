@@ -21,7 +21,7 @@ define tpm.p.make
 	@ echo Available targets: $(2)-tpm
 
   $(2)-tpm:: $(sys.PKGTOP) $(core.LAST_LOADED_FILE)
-	ruby-env 1.8 distributor --dump-path -v $(3:%=-V%) $(4:%=-B%) --source $(sys.SRCTOP) --binary $(sys.BINTOP) -o $(sys.PKGTOP) prodinfo-$(1) ${if $(5),$(5),$(2)}
+	ruby-env 1.8 distributor -v --dump-path $(3:%=-V%) $(4:%=-B%) --source $(sys.SRCTOP) --binary $(sys.BINTOP) -o $(sys.PKGTOP) prodinfo-$(1) ${if $(5),$(5),$(2)}
 endef
 
 define tpm.p.make-rpm
@@ -33,7 +33,7 @@ define tpm.p.make-rpm
 
   $(2)-rpm:: $(2)-tpm $(2)-rpm-only
   $(2)-rpm-only::
-	tpm-to-rpm --dump-path $(4:%=-V%) $(5:%=-B%) $(7:%=-t %) -N $(1)$(3:%=-%) -s $(1).rpm-spec -f $(sys.PKGTOP)/${if $(6),$(6),$(2)}.tpm-path -r $(1)-responses.yaml
+	tpm-to-rpm -v --dump-path $(4:%=-V%) $(5:%=-B%) $(7:%=-t%) -N $(1)$(3:%=-%) -c rpm/$(1).conf -f $(sys.PKGTOP)/${if $(6),$(6),$(2)}.tpm-path
 endef
 
 # ${call tpm.make, <product> [<package>], <version>, <build>, [<package>]}
