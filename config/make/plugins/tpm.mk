@@ -3,7 +3,7 @@
 ${call core.show-current-location}
 ${call core.ensure-defined,sys.PKGTOP}
 
-tpm.TARGETS := package clean clean-packages build-package show-packages
+tpm.TARGETS := package clean clean-packages clean-tpm clean-rpm build-package show-packages
 .PHONY: $(tpm.TARGETS)
 
 define tpm.p.make-package
@@ -65,8 +65,13 @@ $(tpm.TARGETS)::
 package:: build-package
 clean:: clean-packages
 
-clean-packages::
-	rm -f $(sys.PKGTOP)/*.tpm
+clean-packages:: clean-tpm clean-rpm
+
+clean-tpm::
+	rm -f $(sys.PKGTOP)/*.tpm $(sys.PKGTOP)/*.tpm-path
+
+clean-rpm::
+	rm -f $(sys.PKGTOP)/*.rpm $(sys.PKGTOP)/*.rpm-path
 
 show-packages:: $(sys.PKGTOP)
 	@for f in $(sys.PKGTOP)/*.tpm; do echo $${f}; done
