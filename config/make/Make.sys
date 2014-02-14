@@ -72,10 +72,11 @@ ${call core.info,sys,GENDIR - $(sys.GENDIR)}
 ${call core.info,sys,PKGTOP - $(sys.PKGTOP)}
 ${call core.info,sys,PKGDIR - $(sys.PKGDIR)}
 
-sys.p.from-makefile = ${call util.join-path,$(1)/$(core.LAST_LOADED_FROM),${call util.join-path,$(2),$(3)}}
-sys.makefile-src = ${call sys.p.from-makefile,$(sys.SRCDIR),$(1),$(2)}
-sys.makefile-bin = ${call sys.p.from-makefile,$(sys.BINDIR),$(1),$(2)}
-sys.makefile-gen = ${call sys.p.from-makefile,$(sys.GENDIR),$(1),$(2)}
+sys.p.from-makefile = ${call util.join-with,/,$(1)/$(core.LAST_LOADED_FROM),${call util.join-with,${or $(4),/},$(2),$(3)}}
+
+sys.makefile-src = ${call sys.p.from-makefile,$(sys.SRCDIR),$(1),$(2),$(3)}
+sys.makefile-bin = ${call sys.p.from-makefile,$(sys.BINDIR),$(1),$(2),$(3)}
+sys.makefile-gen = ${call sys.p.from-makefile,$(sys.GENDIR),$(1),$(2),$(3)}
 
 .PHONY: sys-ensure-LOCATION
 sys-ensure-LOCATION::

@@ -16,6 +16,8 @@ ruby.docs.front-page = ${eval ${call ruby.docs.p.v,FRONT_PAGE,$(1)} := ${call sy
 
 ruby.docs.pages = ${eval ${call ruby.docs.p.v,PAGES,$(1)} += ${call sys.makefile-src,$(2),$(3)}}
 
+ruby.docs.files = ${eval ${call ruby.docs.p.v,FILES,$(1)} += ${call sys.makefile-src,$(2),$(3),///}}
+
 ruby.docs.make = ${if $(ruby.docs.MAKE_$(1)),,${eval ${call ruby.docs.p.make,$(1),$(2),$(3)}}}
 
 # Private rules
@@ -28,6 +30,11 @@ ruby.docs.p.install-target = $$(LOCATION)/$(1)$(${call ruby.docs.p.v,API_VERSION
 
 define ruby.docs.p.make
   ${call ruby.docs.p.make-targets,$(1),${call ruby.docs.p.target,$(1)},${call ruby.docs.p.install-target,$(1)},$(2),$(3)}
+endef
+
+define ruby.docs.p.install-files
+  sh -c 'tar -C $${0} -cf - $${@} | tar -C $(2) -xf -' ${subst ///, ,$(1)}
+
 endef
 
 define ruby.docs.p.make-targets
@@ -43,6 +50,7 @@ define ruby.docs.p.make-targets
   local-install-docs:: $(2)
 	mkdir -p $(3)
 	cp -r $$(<)/. $(3)/.
+	$$(foreach dir,$$(${call ruby.docs.p.v,FILES,$(1)}),$$(call ruby.docs.p.install-files,$$(dir),$(3)/.))
 
   local-clean-docs::
 	rm -rf $(2)
