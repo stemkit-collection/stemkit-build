@@ -28,6 +28,10 @@ define util.add-env-variable
   export $(1)
 endef
 
+define util.join-with
+  ${if $(3),${foreach item,$(2),${3:%=$(item)$(1)%}},$(2)}
+endef
+
 define util.join-path
-  ${if $(2),${foreach item,$(1),${2:%=$(item)/%}},$(1)}
+  ${call util.join-with,/,$(1),$(2)}
 endef
