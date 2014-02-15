@@ -10,9 +10,9 @@ define core.info
   ${if ${call core.trace-on,$(1)},${info ### [$(1)] $(2) $(3)}}
 endef
 
-define core.ensure-defined
-  ${foreach item,$(1),${if $($(item)),,${error $(item) not defined}}}
-endef
+core.ensure = ${or $($(1)),${error Variable $(1:%='%') not defined}}
+
+core.ensure-defined = ${if ${foreach item,$(1),${call core.ensure,$(item)}},}
 
 define core.trace-current-location
   ${call core.trace,core,Got here,$(core.LAST_LOADED_FILE)}
