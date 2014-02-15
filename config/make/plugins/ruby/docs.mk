@@ -45,12 +45,12 @@ define ruby.docs.p.make-targets
 	mkdir -p $$(@)
 
   local-docs:: $(2)
-	$(ruby.ENV) yard doc -o $$(<) -b $$(<)/.yardoc --yardopts $(ruby.docs.YARDOPTS) $$(${call ruby.docs.p.v,FRONT_PAGE,$(1)}:%=--main '%') $$(${call ruby.docs.p.v,INCLUDE,$(1)}:%='%') - $$(${call ruby.docs.p.v,PAGES,$(1)}:%='%')
+	$(ruby.ENV) yard doc -o $(2) -b $(2)/.yardoc --yardopts $(ruby.docs.YARDOPTS) $$(${call ruby.docs.p.v,FRONT_PAGE,$(1)}:%=--main '%') $$(${call ruby.docs.p.v,INCLUDE,$(1)}:%='%') - $$(${call ruby.docs.p.v,PAGES,$(1)}:%='%')
+	$$(foreach dir,$$(${call ruby.docs.p.v,FILES,$(1)}),$$(call ruby.docs.p.install-files,$$(dir),$(2)/.))
 
   local-install-docs:: $(2)
 	mkdir -p $(3)
-	cp -r $$(<)/. $(3)/.
-	$$(foreach dir,$$(${call ruby.docs.p.v,FILES,$(1)}),$$(call ruby.docs.p.install-files,$$(dir),$(3)/.))
+	cp -r $(2)/. $(3)/.
 
   local-clean-docs::
 	rm -rf $(2)
