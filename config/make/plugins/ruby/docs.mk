@@ -33,7 +33,7 @@ define ruby.docs.p.make
 endef
 
 define ruby.docs.p.copy-files
-  sh -c 'tar -C $${0} -cf - $${@} | tar -C $(2) -xf -' ${subst ///, ,$(1)}
+  sh -c '{ tar -C $${0} -cf - $${@} || kill $${$$}; } | tar -C $(2) -xf -' ${subst ///, ,$(1)}
 
 endef
 
