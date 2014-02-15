@@ -32,8 +32,10 @@ define ruby.docs.p.make
   ${call ruby.docs.p.make-targets,$(1),$(sys.PKGTOP)/docs,${call ruby.docs.p.base,$(1)},${call ruby.docs.p.v,DEPLOY,$(1)},$(2),$(3)}
 endef
 
-define ruby.docs.p.copy-files
-  sh -c '{ tar -C $${0} -cf - $${@} || kill $${$$}; } | tar -C $(2) -xf -' ${subst ///, ,$(1)}
+ruby.docs.p.split = ${foreach item,${subst ///, ,$(1)},${dir $(item)} ${notdir $(item)}}
+
+define ruby.docs.p.copy-file-ensure-folder
+  sh -x -c 'mkdir -p $${0}/$${3} && rm -f $${0}/$${3}/$${4} && cp $${1}/$${2}/$${3}/$${4} $${0}/$${3}/$${4}' $(2) ${call ruby.docs.p.split,$(1)}
 
 endef
 
@@ -66,7 +68,7 @@ define ruby.docs.p.make-targets
 
   local-docs:: $(2)/$(3)
 	$(ruby.ENV) yard doc -o $$(<) -b $$(<)/.yardoc --yardopts $(ruby.docs.YARDOPTS) $$(${call ruby.docs.p.v,FRONT_PAGE,$(1)}:%=--main '%') $$(${call ruby.docs.p.v,INCLUDE,$(1)}:%='%') - $$(${call ruby.docs.p.v,PAGES,$(1)}:%='%')
-	$$(foreach dir,$$(${call ruby.docs.p.v,FILES,$(1)}),$$(call ruby.docs.p.copy-files,$$(dir),$$(<)/.))
+	@ $$(foreach item,$${wildcard $$(${call ruby.docs.p.v,FILES,$(1)})},$$(call ruby.docs.p.copy-file-ensure-folder,$$(item),$$(<)/.))
 
   local-clean-docs::
 	rm -rf $(2)/$(3)
@@ -93,7 +95,7 @@ local-install-docs local-clean-installed-docs::
 # whether 'docs' is present in the current folder or not.
 #
 $(ruby.docs.TARGETS)::
-	@ $(MAKE) local-$(@)
-	@ find */* -name docs -print | while read path; do $(MAKE) -C `dirname $${path}` local-$(@) || exit $${?}; done
+	+ $(MAKE) local-$(@)
+	+ find */* -name docs -print | while read path; do $(MAKE) -C `dirname $${path}` local-$(@) || exit $${?}; done
 
 $(ruby.docs.LOCAL_TARGETS)::
