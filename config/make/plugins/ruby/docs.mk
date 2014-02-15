@@ -52,7 +52,7 @@ define ruby.docs.p.clean-locally
 endef
 
 define ruby.docs.p.deploy-via-make
-  + $(MAKE) -C $(4) deploy-$(1) SOURCE=${abspath $(2)/$(3)} OFFSET=$(3)
+  + $(MAKE) -C $(4)/${or $(SCOPE),.} deploy-$(1) SOURCE=${abspath $(2)/$(3)} OFFSET=$(3)
 endef
 
 define ruby.docs.p.figure-deploy
