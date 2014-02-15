@@ -39,7 +39,7 @@ endef
 
 define ruby.docs.p.install-locally
   rm -rf $(2)
-  mkdir $(2)
+  mkdir -p $(2)
   cp -r $(1)/. $(2)/.
 
 endef
@@ -71,7 +71,7 @@ define ruby.docs.p.make-targets
   local-clean-docs::
 	rm -rf $(2)/$(3)
 
-  local-install-docs:: $(2)/$(3)
+  local-install-docs::
 	$${call ruby.docs.p.figure-deploy,install,$(2),$(3),$$($(4))}
 
   local-clean-installed-docs::
