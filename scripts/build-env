@@ -20,18 +20,16 @@ class Application < SK::ScopingLauncher
   #########
 
   def setup
-    update_environment source_scope_settings if source_scope?
+    environment.update source_scope_settings if source_scope?
 
-    config('.buildrc', :uproot => true, :home => true).tap { |_config|
-      self.transparent = _config.attribute(:transparent)
-      update_environment _config.properties(:make, :build), :prefix => false, :upcase => false
-    }
+    environment.load_general_properties
+    environment.load_build_properties
 
     if local_scope?
-      update_environment project_scope_settings
+      environment.update project_scope_settings
 
       config('build.yaml', :spot => local_scope_top.join('config')).tap { |_config|
-        update_environment _config.properties, :prefix => :sk_prj, :upcase => true
+        environment.update _config.properties, :prefix => :sk_prj, :upcase => true
       }
     else
       self.transparent = true

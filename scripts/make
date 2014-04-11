@@ -37,19 +37,17 @@ class Application < SK::ScopingLauncher
   def setup
     setup_scope_descriptors :makefile, :Makefile
 
-    update_environment global_scope_settings if global_scope?
-    update_environment source_scope_settings if source_scope?
+    environment.update global_scope_settings if global_scope?
+    environment.update source_scope_settings if source_scope?
 
-    config('.buildrc', :uproot => true, :home => true).tap { |_config|
-      self.transparent = _config.attribute(:transparent)
-      update_environment _config.properties(:make, :build), :prefix => false, :upcase => false
-    }
+    environment.load_general_properties
+    environment.load_build_properties
 
     if local_scope?
-      update_environment project_scope_settings
+      environment.update project_scope_settings
 
       config('build.yaml', :spot => local_scope_top.join('config')).tap { |_config|
-        update_environment _config.properties, :prefix => :sk_prj, :upcase => true
+        environment.update _config.properties, :prefix => :sk_prj, :upcase => true
       }
     else
       self.transparent = true
@@ -84,13 +82,13 @@ class Application < SK::ScopingLauncher
 
   def setup_scope_descriptors(*args)
     args.each do |_makefile|
-      break update_environment :local_makefile => _makefile if exists_in_current?(_makefile)
+      break environment.update :local_makefile => _makefile if exists_in_current?(_makefile)
     end
 
     return unless local_scope?
     return if scope_descriptors_to_top(*args).empty?
 
-    update_environment :makefiles_to_top => scope_descriptors_to_top.join(' ')
+    environment.update :makefiles_to_top => scope_descriptors_to_top.join(' ')
   end
 
   def global_scope_settings
@@ -125,7 +123,7 @@ class Application < SK::ScopingLauncher
       begin
         return args.map { |_item|
           if _target
-            update_environment :one => _item
+            environment.update :one => _item
             _target = nil
           else
             (_target = _item.scan(%r{^((?=[^-])[^=]+)-one$}).flatten.first) || _item
