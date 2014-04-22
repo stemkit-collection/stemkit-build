@@ -108,13 +108,24 @@ class Application < SK::ScopingLauncher
   def inject_top_makefile(args)
     case
       when global_scope?
-        [ '-f', global_makefile, args ]
+        [ '-f', global_makefile, cleanup_top_makefile(global_makefile, args) ]
 
       when local_scope?
-        [ '-f', project_makefile, args ]
+        [ '-f', project_makefile, cleanup_top_makefile(project_makefile, args) ]
 
       else
         args
+    end
+  end
+
+  def cleanup_top_makefile(makefile, args)
+    [ [], makefile.basename.to_s ].tap do |_items, _name, _cache|
+      args.each do |_item|
+        next ( File.basename(_item) == _name ? [].tap { _cache = false } : _cache ) << _item if _cache
+        ( _item == '-f' ? _cache = [] : _items ) << _item
+      end
+
+      return _cache ? _items + _cache : _items
     end
   end
 
