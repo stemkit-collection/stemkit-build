@@ -22,8 +22,6 @@ ruby.docs.deploy = ${eval ${call ruby.docs.p.v,DEPLOY,$(1)} = ${call sys.makefil
 
 ruby.docs.make = ${if $(ruby.docs.MAKE_$(1)),,${eval ${call ruby.docs.p.make,$(1),$(2),$(3)}}}
 
-
-
 # Private rules
 #
 ruby.docs.p.v = ruby.docs.$(1)_$(2)_$(core.LAST_LOADED_FROM)
